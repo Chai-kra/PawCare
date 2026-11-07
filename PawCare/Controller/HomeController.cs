@@ -1,21 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Demo.Controllers;
+namespace PawCare.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public IActionResult Index() => View();
 
-    public IActionResult Page1()
-    {
-        return View();
-    }
+    public IActionResult Services() => View();
 
-    public IActionResult Page2()
-    {
-        return View();
-    }
+    public IActionResult About() => View();
+
+    public IActionResult Contact() => View();
 }

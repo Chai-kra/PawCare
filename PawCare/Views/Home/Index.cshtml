@@ -1,13 +1,86 @@
-﻿@{
-    ViewBag.Title = "Home | Index";
+@{
+    ViewBag.Title = "Home";
+    ViewBag.HideTitle = true;
+    ViewBag.FullWidth = true;
 }
 
-<p>Index</p>
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <h1>Grooming your pet will look forward to</h1>
+            <p>Book a bath, trim or spa session in minutes. Our groomers keep every visit calm, clean and stress-free.</p>
+            <div class="hero-actions">
+                <a class="btn btn-light" asp-controller="Home" asp-action="Contact">Book a visit</a>
+                <a class="btn btn-ghost" asp-controller="Home" asp-action="Services">See services</a>
+            </div>
+        </div>
 
-<a href="/Home/Page1">Page 1</a>
+        <aside class="slip" aria-label="Example appointment">
+            <div class="slip-top">
+                <span class="slip-label">Appointment</span>
+                <span class="pill">Confirmed</span>
+            </div>
+            <p class="slip-pet">Mochi</p>
+            <p class="slip-breed">Shih Tzu</p>
+            <dl class="slip-meta">
+                <div><dt>Service</dt><dd>Full groom</dd></div>
+                <div><dt>When</dt><dd>Sat 14 Nov, 10:30 am</dd></div>
+                <div><dt>Groomer</dt><dd>Sarah</dd></div>
+            </dl>
+            <p class="slip-foot">Example booking</p>
+        </aside>
+    </div>
+</section>
 
-<a asp-controller="Home" asp-action="Page1">Page 1</a>
+<section class="block">
+    <div class="container">
+        <h2 class="block-title">Care for every coat</h2>
+        <div class="highlights">
+            <div class="highlight">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.3 6 10.5A6 6 0 0 1 6 13.5C6 9.3 12 3 12 3z" /></svg>
+                <h3>Baths and spa</h3>
+                <p>Pet-safe shampoos, conditioning and a fluffy blow dry, tuned to your pet's skin and coat.</p>
+            </div>
+            <div class="highlight">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M8.6 7.6 20 16M8.6 16.4 20 8" /></svg>
+                <h3>Cuts and styling</h3>
+                <p>Breed-aware trims, neat paws and tidy faces, from a quick sanitary trim to a full groom.</p>
+            </div>
+            <div class="highlight">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
+                <h3>Hygiene and health</h3>
+                <p>Nail trims, ear cleaning and teeth care that keep small problems from becoming big ones.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-@Html.ActionLink("Page 1", "Page1", "Home")
+<section class="block block-tint">
+    <div class="container">
+        <h2 class="block-title">How a visit works</h2>
+        <ol class="steps">
+            <li>
+                <h3>Tell us about your pet</h3>
+                <p>Name, breed, size and anything we should know, such as allergies or a nervous streak.</p>
+            </li>
+            <li>
+                <h3>Choose a service and time</h3>
+                <p>Pick a package and a slot that suits you. Prices and durations are shown up front.</p>
+            </li>
+            <li>
+                <h3>Drop off and relax</h3>
+                <p>We look after the rest and let you know when your pet is ready to go home.</p>
+            </li>
+        </ol>
+    </div>
+</section>
 
-<partial name="_RepeatText" model='("Hello World", 10)'>
+<section class="cta-band">
+    <div class="container cta-inner">
+        <div>
+            <h2>Ready for a fresh, happy pet?</h2>
+            <p>Get in touch and we will find a time that works.</p>
+        </div>
+        <a class="btn btn-light" asp-controller="Home" asp-action="Contact">Book a visit</a>
+    </div>
+</section>

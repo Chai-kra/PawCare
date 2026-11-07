@@ -1,18 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 #nullable disable warnings
 
-namespace Assignment.Models
+namespace PawCare.Models
 {
-    public class Database : DbContext
+    public class Database(DbContextOptions<Database> options) : DbContext(options)
     {
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
     }
+    // Customer, Pet, Staff classes unchanged
 
-    public class Customer
+
+public class Customer
     {
         [Key, Required,MaxLength(7)]
         public String Id { get; set; }
