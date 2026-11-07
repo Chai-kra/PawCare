@@ -1,0 +1,13 @@
+﻿@{
+    ViewBag.Title = "Home | Index";
+}
+
+<p>Index</p>
+
+<a href="/Home/Page1">Page 1</a>
+
+<a asp-controller="Home" asp-action="Page1">Page 1</a>
+
+@Html.ActionLink("Page 1", "Page1", "Home")
+
+<partial name="_RepeatText" model='("Hello World", 10)'>

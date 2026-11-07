@@ -1,12 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace PawCare.Controller
+namespace Demo.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
+    }
+
+    public IActionResult Page1()
+    {
+        return View();
+    }
+
+    public IActionResult Page2()
+    {
+        return View();
     }
 }
