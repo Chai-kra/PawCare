@@ -11,7 +11,6 @@ namespace PawCare.Models
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
     }
-    // Customer, Pet, Staff classes unchanged
 
 
 public class Customer
