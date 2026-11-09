@@ -10,12 +10,16 @@ namespace PawCare.Models
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
+
+        //todo later
+        // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
+        // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
     }
 
-
-public class Customer
+    [Index(nameof(Email), IsUnique = true)]
+    public class Customer
     {
-        [Key, Required,MaxLength(7)]
+        [Key, Required, MaxLength(7)]
         public String Id { get; set; }
         [Required, MaxLength(100)]
         public String Name { get; set; }
@@ -24,7 +28,15 @@ public class Customer
         [MaxLength(15)]
         public String Phone { get; set; }
 
+        // Not show or log. Filled by IPasswordHasher<Customer>.
+        [Required, MaxLength(200)]
+        public String PasswordHash { get; set; }
+
         public List<Pet> Pets { get; set; } = [];
+
+        //todo later
+        // INSERT (loyalty points):  public int LoyaltyPoints { get; set; }
+        // INSERT (appointments):    public List<Appointment> Appointments { get; set; } = [];
     }
 
     public class Pet
@@ -54,7 +66,7 @@ public class Customer
         public String Email { get; set; }
         [MaxLength(15)]
         public String Phone { get; set; }
-    }
 
-    
+        // INSERT (staff login): add PasswordHash like Customer, then sign in
+    }
 }
