@@ -1,0 +1,8 @@
+﻿@model (string Text, int Count)
+
+<p>
+    @for (int i = 1; i <= Model.Count; i++)
+    {
+        @Model.Text<br>    
+    }
+</p>

@@ -1,0 +1,109 @@
+@*
+    SHARED LAYOUT - insertion points (all optional):
+      @section head    { }   extra <link>/<style>/<meta> inside <head>
+      @section nav     { }   extra links appended to the main navigation
+      @section actions { }   REPLACES the header call-to-action (e.g. login / account menu later)
+      @section foot    { }   page scripts, rendered after jQuery and app.js
+      @RenderBody()          dynamic page content
+    ViewBag switches a page may set:
+      ViewBag.Title      page title (also the <h1> unless HideTitle is true)
+      ViewBag.HideTitle  true = do not print the automatic <h1>
+      ViewBag.FullWidth  true = page content is not wrapped in the centred container
+*@
+
+
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    bool IsActive(string name) => string.Equals(action, name, StringComparison.OrdinalIgnoreCase);
+    bool hideTitle = ViewBag.HideTitle == true;
+    bool fullWidth = ViewBag.FullWidth == true;
+    
+    string homeCls = IsActive("Index") ? "active" : "";
+    string servicesCls = IsActive("Services") ? "active" : "";
+    string aboutCls = IsActive("About") ? "active" : "";
+    string contactCls = IsActive("Contact") ? "active" : "";
+    string mainClass = fullWidth ? "" : "container page";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title | PawCare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
+    @RenderSection("head", false)
+</head>
+<body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-name">PawCare</span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+                <span></span>
+            </button>
+
+            <nav id="site-nav" class="site-nav" aria-label="Main">
+                <a class="@homeCls" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="@servicesCls" asp-controller="Home" asp-action="Services">Services</a>
+                <a class="@aboutCls" asp-controller="Home" asp-action="About">About</a>
+                <a class="@contactCls" asp-controller="Home" asp-action="Contact">Contact</a>
+
+                @RenderSection("nav", false)
+            </nav>
+
+            <div class="header-actions">
+                @if (IsSectionDefined("actions"))
+                {
+                    @RenderSection("actions")
+                }
+                else
+                {
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="Contact">Book a visit</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main id="content" class="@mainClass">
+        @if (!hideTitle)
+        {
+            <h1 class="page-title">@ViewBag.Title</h1>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <div>
+                    <strong>PawCare</strong>
+                    <p>Gentle grooming and care for dogs, cats and small pets.</p>
+                </div>
+            </div>
+            <nav class="footer-links" aria-label="Footer">
+                <a asp-controller="Home" asp-action="Services">Services</a>
+                <a asp-controller="Home" asp-action="About">About</a>
+                <a asp-controller="Home" asp-action="Contact">Contact</a>
+            </nav>
+        </div>
+        <div class="container footer-credit">
+            Developed by <b>PawCare Inc.</b> &middot;
+            Copyrighted &copy; @DateTime.Today.Year
+        </div>
+    </footer>
+
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="/js/jquery.validate.min.js"></script>
+    <script src="/js/jquery.validate.unobtrusive.min.js"></script>
+    <script src="/js/app.js" asp-append-version="true"></script>
+    @RenderSection("foot", false)
+</body>
+</html>
