@@ -1,0 +1,31 @@
+@model PawCare.ViewModels.AccountDashboardViewModel
+@{
+    ViewBag.Title = "My account";
+}
+
+<p class="lead">Welcome back, <strong>@Model.Username</strong>.</p>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Profile</h2>
+        <p>@Model.Username<br>@Model.Email</p>
+    </section>
+
+    @* INSERT (pet managing): filter queries by User.CustomerId() *@
+    <section class="panel panel-placeholder">
+        <h2>My pets</h2>
+        <p>Your pet profiles will appear here.</p>
+    </section>
+
+    @* INSERT (appointment making): take CustomerId from User.CustomerId(), not the form *@
+    <section class="panel panel-placeholder">
+        <h2>Appointments</h2>
+        <p>Your upcoming visits will appear here.</p>
+    </section>
+
+    @* INSERT (loyalty points): award points server-side only *@
+    <section class="panel panel-placeholder">
+        <h2>Loyalty points</h2>
+        <p>Points you earn from visits will appear here.</p>
+    </section>
+</div>

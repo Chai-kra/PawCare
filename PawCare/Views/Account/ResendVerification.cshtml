@@ -1,0 +1,26 @@
+@model PawCare.ViewModels.ResendVerificationViewModel
+@{
+    ViewBag.Title = "Resend verification";
+    ViewBag.HideTitle = true;
+}
+
+<div class="login-container">
+    <h2>Resend Verification Email</h2>
+    <p class="hint">Enter the email you registered with and we will send a new link.</p>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+    <form asp-action="ResendVerification" method="post">
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="login-controller" placeholder="Enter Email" autocomplete="email" />
+            <span asp-validation-for="Email" class="error-message"></span>
+        </div>
+
+        <button type="submit" class="btn-login">Send link</button>
+    </form>
+
+    <div class="login-links">
+        <a asp-action="Login">Back to login</a>
+    </div>
+</div>

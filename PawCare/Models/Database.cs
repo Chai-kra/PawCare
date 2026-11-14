@@ -11,9 +11,8 @@ namespace PawCare.Models
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
 
-        //todo later
-        // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
-        // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
+        // INSERT (appointments):   public DbSet<Appointment> Appointments { get; set; }
+        // INSERT (loyalty points): public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
     }
 
     [Index(nameof(Email), IsUnique = true)]
@@ -21,6 +20,7 @@ namespace PawCare.Models
     {
         [Key, Required, MaxLength(7)]
         public String Id { get; set; }
+        // Entered as "Username" on the register form.
         [Required, MaxLength(100)]
         public String Name { get; set; }
         [Required, MaxLength(100)]
@@ -28,15 +28,20 @@ namespace PawCare.Models
         [MaxLength(15)]
         public String Phone { get; set; }
 
-        // Not show or log. Filled by IPasswordHasher<Customer>.
+        // Hash only; never store or log plain passwords.
         [Required, MaxLength(200)]
         public String PasswordHash { get; set; }
 
+        // Email verification (the token is stored hashed).
+        public bool EmailConfirmed { get; set; }
+        [MaxLength(64)]
+        public String VerifyTokenHash { get; set; }
+        public DateTime? VerifyTokenExpires { get; set; }
+
         public List<Pet> Pets { get; set; } = [];
 
-        //todo later
-        // INSERT (loyalty points):  public int LoyaltyPoints { get; set; }
-        // INSERT (appointments):    public List<Appointment> Appointments { get; set; } = [];
+        // INSERT (loyalty points): public int LoyaltyPoints { get; set; }
+        // INSERT (appointments):   public List<Appointment> Appointments { get; set; } = [];
     }
 
     public class Pet

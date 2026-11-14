@@ -1,0 +1,52 @@
+@model PawCare.ViewModels.LoginViewModel
+@inject PawCare.Services.IRecaptchaService Recaptcha
+@{
+    ViewBag.Title = "Login";
+    ViewBag.HideTitle = true;
+}
+
+<div class="login-container">
+    <h2>Login</h2>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+    <form asp-action="Login" asp-route-returnUrl="@(ViewBag.ReturnUrl as string)" method="post">
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="login-controller" placeholder="Enter Email" autocomplete="username" />
+            <span asp-validation-for="Email" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="login-controller" placeholder="Enter Password" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="error-message"></span>
+        </div>
+
+        <div class="form-group form-check">
+            <input asp-for="RememberMe" type="checkbox" />
+            <label asp-for="RememberMe">Remember me</label>
+        </div>
+
+        @if (Recaptcha.Enabled)
+        {
+            <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="@Recaptcha.SiteKey"></div>
+            </div>
+        }
+
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+
+    <div class="login-links">
+        <a asp-action="Register">Create an account</a>
+        <a asp-action="ResendVerification">Resend verification email</a>
+    </div>
+</div>
+
+@section foot {
+    @if (Recaptcha.Enabled)
+    {
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    }
+}

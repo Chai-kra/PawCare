@@ -1,0 +1,12 @@
+Delete these files from your repo (they were moved/fixed in Views/Account/ or are unused):
+  PawCare/Views/Login.cshtml
+  PawCare/Views/Register.cshtml
+Optional leftovers from the course template:
+  PawCare/Views/Home/Page1.cshtml
+  PawCare/Views/Home/Page2.cshtml
+  PawCare/Views/Shared/_Photo.cshtml
+  PawCare/Views/Shared/_RepeatText.cshtml
+
+After copying the files in:
+  Package Manager Console ->  Add-Migration AddEmailVerification   (or InitialCreate if you have no migrations yet)
+                          ->  Update-Database
