@@ -10,7 +10,8 @@ namespace PawCare.Models
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
-
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Service> Services { get; set; }
         // INSERT (appointments):   public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points): public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
     }
@@ -74,5 +75,28 @@ namespace PawCare.Models
         public String Phone { get; set; }
 
         // INSERT (staff login): add PasswordHash like Customer, then sign in
+    }
+
+    public class Category
+    {
+        [Key, Required ,MaxLength(4)]
+        public String Id { get; set; }
+        [Required, MaxLength(100)]
+        public String Name { get; set; }
+    }
+
+    public class Service
+    {
+        [Key, Required, MaxLength(7)]
+        public String Id { get; set; }
+        [Required, MaxLength(100)]
+        public String Name { get; set; }
+        [MaxLength(200)]
+        public String Description { get; set; }
+        public decimal Price { get; set; }
+        public int Duration { get; set; }
+        [Required, MaxLength(4)]
+        public string CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

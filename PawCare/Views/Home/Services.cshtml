@@ -1,62 +1,48 @@
+@model IEnumerable<PawCare.Models.Service>
+
 @{
     ViewBag.Title = "Services";
     ViewBag.HideTitle = true;
 }
 
-<div class="category-menu" id="category-menu">
-    <button class="category-btn" type="button" aria-expanded="false" aria-controls="category-panel">
-        Categories <span class="chev">▾</span>
-    </button>
-    <div class="page-head">
-        <h1 class="page-title">Services</h1>
-
-        <ul class="category-panel" id="category-panel" hidden>
-        </ul>
-    </div>
+@*menu*@
+<div class="page-head">
+    <h1 class="page-title">Services</h1>
+    <select id="category">
+        <option value="">   - All Categories -   </option>
+        <option>Baths and spa</option>
+        <option>Cuts and styling</option>
+        <option>Hygiene and health</option>
+    </select>
 </div>
 
 <form class="service-search" method="get" role="search">
-    @Html.TextBox("name", ViewData["Search"] as string ?? "",
+    @Html.TextBox("name", ViewData["ServiceName"] as string ?? "",
         new { type = "search", autofocus = "", data_trim = "", placeholder = "Search service..." })
     <button type="submit" class="btn-search">Search</button>
 </form>
 
 <p class="lead">Every package includes a gentle brush-out and a check of ears, nails and skin. Prices are a guide and may vary with coat length and size.</p>
 
-<section class="menu-group">
-    <h2>Baths and spa</h2>
-    <div class="menu-item">
-        <div><h3>Basic bath</h3><p>Shampoo, rinse and blow dry.</p></div>
-        <div class="menu-price"><strong>RM 45</strong><span>60 min</span></div>
-    </div>
-    <div class="menu-item">
-        <div><h3>Deluxe spa bath</h3><p>Bath with conditioner, ear cleaning and a paw massage.</p></div>
-        <div class="menu-price"><strong>RM 85</strong><span>90 min</span></div>
-    </div>
-</section>
+<p>@Model.Count() record(s)</p>
 
-<section class="menu-group">
-    <h2>Cuts and styling</h2>
-    <div class="menu-item">
-        <div><h3>Full groom</h3><p>Bath, haircut, nail trim and ear cleaning.</p></div>
-        <div class="menu-price"><strong>RM 120</strong><span>120 min</span></div>
-    </div>
-    <div class="menu-item">
-        <div><h3>Sanitary trim</h3><p>A quick tidy of face, paws and hygiene areas.</p></div>
-        <div class="menu-price"><strong>RM 35</strong><span>30 min</span></div>
-    </div>
-</section>
-
-<section class="menu-group">
-    <h2>Hygiene and health</h2>
-    <div class="menu-item">
-        <div><h3>Nail trim</h3><p>Clipping and filing for comfortable walking.</p></div>
-        <div class="menu-price"><strong>RM 20</strong><span>30 min</span></div>
-    </div>
-    <div class="menu-item">
-        <div><h3>Teeth cleaning</h3><p>Gentle brushing to freshen breath and care for gums.</p></div>
-        <div class="menu-price"><strong>RM 40</strong><span>30 min</span></div>
-    </div>
-</section>
+@foreach (var s in Model)
+{
+    <section class="menu-group">
+        <h2>@s.Category?.Name</h2>
+        <div class="menu-item">
+            <div>
+                <h3>@s.Name</h3>
+                <p>@s.Description</p>
+            </div>
+            <div class="menu-price">
+                <strong>RM @s.Price</strong>
+                <span>@s.Duration min</span>
+                <button type="button" class="btn btn-primary btn-book">Book</button>
+            </div>
+        </div>
+    </section>
+}
 
 <p class="note">Implement services in database or smn I guess, not sure</p>
+
