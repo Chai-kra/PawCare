@@ -7,7 +7,7 @@ using PawCare.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Load secrets.env (KEY=VALUE per line) into configuration.
-var secretsFile = Path.Combine(builder.Environment.ContentRootPath, "secrets.env");
+var secretsFile = Path.Combine(builder.Environment.ContentRootPath, "Secret.env");
 if (File.Exists(secretsFile))
 {
     builder.Configuration.AddInMemoryCollection(
