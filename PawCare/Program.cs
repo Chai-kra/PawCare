@@ -6,6 +6,17 @@ using PawCare.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load secrets.env (KEY=VALUE per line) into configuration.
+var secretsFile = Path.Combine(builder.Environment.ContentRootPath, "secrets.env");
+if (File.Exists(secretsFile))
+{
+    builder.Configuration.AddInMemoryCollection(
+        File.ReadAllLines(secretsFile)
+            .Where(line => line.Contains('=') && !line.TrimStart().StartsWith('#'))
+            .Select(line => line.Split('=', 2))
+            .ToDictionary(p => p[0].Trim().Replace("__", ":"), p => (string?)p[1].Trim().Trim('"')));
+}
+
 // Validate anti-forgery tokens on all POST requests.
 builder.Services.AddControllersWithViews(options =>
 {
@@ -40,9 +51,15 @@ builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
 builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
 
 var app = builder.Build();
+
+// Create the database and tables on first run.
+using (var scope = app.Services.CreateScope())
+    scope.ServiceProvider.GetRequiredService<Database>().Database.EnsureCreated();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAuthentication();   // before UseAuthorization
 app.UseAuthorization();
 app.MapDefaultControllerRoute();
+
 app.Run();

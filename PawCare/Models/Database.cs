@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-#nullable disable warnings
+#nullable disable
 
 namespace PawCare.Models
 {
@@ -56,6 +56,7 @@ namespace PawCare.Models
         public String Breed { get; set; }
 
         //FK
+        [Required, MaxLength(7)]
         public string CustomerId { get; set; }
 
         public Customer Customer { get; set; }
