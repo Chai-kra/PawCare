@@ -1,8 +1,7 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@model PawCare.ViewModels.RegisterViewModel
 @{
     ViewBag.Title = "Register";
+    ViewBag.HideTitle = true;
 }
 
 <div class="register-container">
@@ -10,28 +9,29 @@
 
     <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
 
-    <form asp-action="Register" method="POST">
+    <form asp-action="Register" method="post">
         <div class="form-group">
             <label asp-for="Username"></label>
-            <input asp-for="Username" class="register-controller" placeholder="Enter Username" />
+            <input asp-for="Username" class="register-controller" placeholder="Enter Username" autocomplete="nickname" />
             <span asp-validation-for="Username" class="error-message"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Email"></label>
-            <input asp-for="Email" class="register-controller" placeholder="Enter Email" />
+            <input asp-for="Email" class="register-controller" placeholder="Enter Email" autocomplete="email" />
             <span asp-validation-for="Email" class="error-message"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Password"></label>
-            <input asp-for="Password" class="register-controller" placeholder="Enter Password" />
+            <input asp-for="Password" class="register-controller" placeholder="Enter Password" autocomplete="new-password" />
+            <p class="hint">At least 8 characters, with a letter and a number.</p>
             <span asp-validation-for="Password" class="error-message"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="ConfirmPassword"></label>
-            <input asp-for="ConfirmPassword" class="register-controller" placeholder="Enter Confirm Password" />
+            <input asp-for="ConfirmPassword" class="register-controller" placeholder="Enter Confirm Password" autocomplete="new-password" />
             <span asp-validation-for="ConfirmPassword" class="error-message"></span>
         </div>
 
@@ -41,5 +41,4 @@
     <div class="login-links">
         <a asp-action="Login">Already have an account? Login</a>
     </div>
-
 </div>

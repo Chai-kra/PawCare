@@ -2,7 +2,7 @@
     SHARED LAYOUT - insertion points (all optional):
       @section head    { }   extra <link>/<style>/<meta> inside <head>
       @section nav     { }   extra links appended to the main navigation
-      @section actions { }   REPLACES the header call-to-action (e.g. login / account menu later)
+      @section actions { }   REPLACES the header account area (log in / register, or name / log out)
       @section foot    { }   page scripts, rendered after jQuery and app.js
       @RenderBody()          dynamic page content
     ViewBag switches a page may set:
@@ -11,13 +11,16 @@
       ViewBag.FullWidth  true = page content is not wrapped in the centred container
 *@
 
-
 @{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    bool IsActive(string name) => string.Equals(action, name, StringComparison.OrdinalIgnoreCase);
+    // Only Home pages highlight the main menu.
+    bool IsActive(string name) =>
+        string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(action, name, StringComparison.OrdinalIgnoreCase);
     bool hideTitle = ViewBag.HideTitle == true;
     bool fullWidth = ViewBag.FullWidth == true;
-    
+
     string homeCls = IsActive("Index") ? "active" : "";
     string servicesCls = IsActive("Services") ? "active" : "";
     string aboutCls = IsActive("About") ? "active" : "";
@@ -34,6 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/auth.css" asp-append-version="true">
     @RenderSection("head", false)
 </head>
 <body>
@@ -55,6 +59,11 @@
                 <a class="@aboutCls" asp-controller="Home" asp-action="About">About</a>
                 <a class="@contactCls" asp-controller="Home" asp-action="Contact">Contact</a>
 
+                @if (User.IsInRole("Customer"))
+                {
+                    @* INSERT (customer links): pets, appointments, rewards *@
+                }
+
                 @RenderSection("nav", false)
             </nav>
 
@@ -63,15 +72,31 @@
                 {
                     @RenderSection("actions")
                 }
+                else if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="header-user" asp-controller="Account" asp-action="Index">@User.Identity?.Name</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="btn btn-outline">Log out</button>
+                    </form>
+                }
                 else
                 {
-                    <a class="btn btn-primary" asp-controller="Home" asp-action="Contact">Book a visit</a>
+                    <a class="btn btn-outline" asp-controller="Account" asp-action="Login">Log in</a>
+                    <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Register</a>
                 }
             </div>
         </div>
     </header>
 
     <main id="content" class="@mainClass">
+        @if (TempData["Success"] is string success)
+        {
+            <div class="alert alert-success" role="status">@success</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-error" role="alert">@error</div>
+        }
         @if (!hideTitle)
         {
             <h1 class="page-title">@ViewBag.Title</h1>

@@ -18,8 +18,8 @@
     --bg: #f6fdfe;
     --radius: 14px;
 
-    --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-    --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Roboto", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Roboto", "Segoe UI", system-ui, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
