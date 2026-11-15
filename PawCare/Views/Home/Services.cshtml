@@ -1,6 +1,25 @@
 @{
     ViewBag.Title = "Services";
+    ViewBag.HideTitle = true;
 }
+
+<div class="category-menu" id="category-menu">
+    <button class="category-btn" type="button" aria-expanded="false" aria-controls="category-panel">
+        Categories <span class="chev">▾</span>
+    </button>
+    <div class="page-head">
+        <h1 class="page-title">Services</h1>
+
+        <ul class="category-panel" id="category-panel" hidden>
+        </ul>
+    </div>
+</div>
+
+<form class="service-search" method="get" role="search">
+    @Html.TextBox("name", ViewData["Search"] as string ?? "",
+        new { type = "search", autofocus = "", data_trim = "", placeholder = "Search service..." })
+    <button type="submit" class="btn-search">Search</button>
+</form>
 
 <p class="lead">Every package includes a gentle brush-out and a check of ears, nails and skin. Prices are a guide and may vary with coat length and size.</p>
 
