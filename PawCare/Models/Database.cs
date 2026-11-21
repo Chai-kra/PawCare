@@ -19,7 +19,7 @@ namespace PawCare.Models
     [Index(nameof(Email), IsUnique = true)]
     public class Customer
     {
-        [Key, Required, MaxLength(7)]
+        [MaxLength(7)]
         public String Id { get; set; }
         // Entered as "Username" on the register form.
         [Required, MaxLength(100)]
@@ -30,7 +30,7 @@ namespace PawCare.Models
         public String Phone { get; set; }
 
         // Hash only; never store or log plain passwords.
-        [Required, MaxLength(200)]
+        [MaxLength(200)]
         public String PasswordHash { get; set; }
 
         // Email verification (the token is stored hashed).
@@ -65,7 +65,7 @@ namespace PawCare.Models
 
     public class Staff
     {
-        [Key, MaxLength(7)]
+        [MaxLength(7)]
         public String Id { get; set; }
         [Required, MaxLength(100)]
         public String Name { get; set; }
@@ -79,7 +79,7 @@ namespace PawCare.Models
 
     public class Category
     {
-        [Key, Required ,MaxLength(4)]
+        [MaxLength(4)]
         public String Id { get; set; }
         [Required, MaxLength(100)]
         public String Name { get; set; }
@@ -87,7 +87,7 @@ namespace PawCare.Models
 
     public class Service
     {
-        [Key, Required, MaxLength(7)]
+        [MaxLength(7)]
         public String Id { get; set; }
         [Required, MaxLength(100)]
         public String Name { get; set; }
