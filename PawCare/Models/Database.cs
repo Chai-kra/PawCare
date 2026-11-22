@@ -11,6 +11,12 @@ namespace PawCare.Models
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
 
+        //Booking module
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<AppointmentItem> AppointmentItems { get; set; }
+        public DbSet<ServicePackage> ServicePackages { get; set; }
+
         //todo later
         // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
@@ -66,6 +72,8 @@ namespace PawCare.Models
         public String Email { get; set; }
         [MaxLength(15)]
         public String Phone { get; set; }
+        [Required, MaxLength(10)]
++       public String Role { get; set; }
 
         // INSERT (staff login): add PasswordHash like Customer, then sign in
     }

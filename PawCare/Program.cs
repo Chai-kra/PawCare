@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PawCare.Models;
 
 var builder = WebApplication.CreateBuilder(args);
