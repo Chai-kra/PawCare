@@ -1,18 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using PawCare.Models;
+using Microsoft.AspNetCore.Mvc;
+using PawCare.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
 
-// SQL Server Express / LocalDB, file-based. "|DataDirectory|" -> <project>/App_Data
-var dataDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
-Directory.CreateDirectory(dataDirectory);
-var connectionString = builder.Configuration.GetConnectionString("Database")
-    ?? throw new InvalidOperationException("Connection string 'Database' not found.");
-builder.Services.AddSqlServer<Database>(connectionString.Replace("|DataDirectory|", dataDirectory));
+builder.Configuration.AddSecretsEnv(builder.Environment.ContentRootPath);
+
+builder.Services.AddControllersWithViews(o =>
+    o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddPawCareDatabase(builder.Configuration, builder.Environment);
+builder.Services.AddPawCareAuth();
+builder.Services.AddPawCareServices();
 
 var app = builder.Build();
+
+app.EnsureDatabaseCreated();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseAuthentication();   // before UseAuthorization
+app.UseAuthorization();
 app.MapDefaultControllerRoute();
+
 app.Run();
