@@ -14,14 +14,12 @@ namespace PawCare.Models
         //Booking module
         public DbSet<Service> Services { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
-        public DbSet<AppointmentItem> AppointmentItems { get; set; }
         public DbSet<ServicePackage> ServicePackages { get; set; }
 
         //todo later
         // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Service> Services { get; set; }
     }
 
     [Index(nameof(Email), IsUnique = true)]
@@ -82,7 +80,7 @@ namespace PawCare.Models
         [MaxLength(15)]
         public String Phone { get; set; }
         [Required, MaxLength(10)]
-+       public String Role { get; set; }
+        public String Role { get; set; }
 
         // INSERT (staff login): add PasswordHash like Customer, then sign in
     }

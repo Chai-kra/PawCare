@@ -61,6 +61,7 @@
 
                 @if (User.IsInRole("Customer"))
                 {
+                    <a asp-controller="Booking" asp-action="Index">My appointments</a>
                     @* INSERT (customer links): pets, appointments, rewards *@
                 }
 

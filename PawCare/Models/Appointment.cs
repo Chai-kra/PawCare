@@ -27,7 +27,7 @@ public class Appointment
 
     public string PetId { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
-    public Pet Pet { get; set; }
+    public Pet Pets { get; set; }
 
     public string StaffId { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
