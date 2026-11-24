@@ -38,7 +38,11 @@
             <div class="menu-price">
                 <strong>RM @s.Price</strong>
                 <span>@s.Duration min</span>
-                <button type="button" class="btn btn-primary btn-book">Book</button>
+                <form asp-controller="Cart" asp-action="Add" method="post" style="margin:8px 0 0;">
+                    <input type="hidden" name="id" value="@s.Id" />
+                    <input type="hidden" name="from" value="services" />
+                    <button type="submit" class="btn btn-primary btn-book">Book</button>
+                </form>
             </div>
         </div>
     </section>

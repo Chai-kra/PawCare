@@ -20,9 +20,13 @@
         string.Equals(action, name, StringComparison.OrdinalIgnoreCase);
     bool hideTitle = ViewBag.HideTitle == true;
     bool fullWidth = ViewBag.FullWidth == true;
+    var cartText = Context.Session.GetString("Cart") ?? "";
+    var cartCount = cartText.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Sum(x => int.Parse(x.Split(':')[1]));
 
     string homeCls = IsActive("Index") ? "active" : "";
     string servicesCls = IsActive("Services") ? "active" : "";
+    string productsCls = IsActive("Products") ? "active" : "";
     string aboutCls = IsActive("About") ? "active" : "";
     string contactCls = IsActive("Contact") ? "active" : "";
     string mainClass = fullWidth ? "" : "container page";
@@ -56,6 +60,7 @@
             <nav id="site-nav" class="site-nav" aria-label="Main">
                 <a class="@homeCls" asp-controller="Home" asp-action="Index">Home</a>
                 <a class="@servicesCls" asp-controller="Home" asp-action="Services">Services</a>
+                <a class="@productsCls" asp-controller="Home" asp-action="Products">Products</a>
                 <a class="@aboutCls" asp-controller="Home" asp-action="About">About</a>
                 <a class="@contactCls" asp-controller="Home" asp-action="Contact">Contact</a>
 
@@ -88,6 +93,16 @@
             </div>
         </div>
     </header>
+    
+    <a asp-controller="Cart" asp-action="Index"
+          style="position:fixed; right:24px; top:80px; z-index:40;
+          display:inline-flex; align-items:center; gap:6px;
+          padding:8px 18px; border-radius:999px;
+          background:#fff; color:#0a86a3; border:1px solid #0a86a3;
+          box-shadow:0 8px 20px -12px rgba(8,51,68,.6);
+          text-decoration:none; font-weight:600; font-size:.95rem;">
+    Cart
+    </a>
 
     <main id="content" class="@mainClass">
         @if (TempData["Success"] is string success)
