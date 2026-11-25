@@ -20,7 +20,7 @@ public class BookingController : Controller
     private string CustomerId => User.Identity!.Name!;
 
     // ------------------------------------------------------------ My appointments
-    public IActionResult Index()
+    public IActionResult Menu()
     {
         var model = db.Appointments
                       .Where(a => a.CustomerId == CustomerId)
@@ -208,7 +208,7 @@ public class BookingController : Controller
 
             // TODO (Payment module): if already paid, trigger the Stripe refund here.
             TempData["Info"] = "Your appointment has been cancelled.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Menu");
         }
 
         vm.PetName = a.Pets.Name;

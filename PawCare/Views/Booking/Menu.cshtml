@@ -1,0 +1,49 @@
+﻿@using PawCare.Models
+@model List<AppointmentListVM>
+@{
+    ViewBag.Title = "My Appointments";
+}
+@section head{
+    <link rel="stylesheet" href="/css/booking.css" asp-append-version="true" />
+}
+
+<p><a asp-action="Create" class="btn btn-primary">Book a new appointment</a></p>
+
+@if (!Model.Any())
+{
+    <p class="hint">You have no appointments yet.</p>
+}
+else
+{
+    <div class="bk-table-wrap">
+        <table class="bk-table">
+            <thead>
+                <tr>
+                    <th>Date and Time</th><th>Pet</th><th>Service</th>
+                    <th>Staff</th><th class="bk-num">Price</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    var badge = "bk-badge bk-" + a.Status.ToString().ToLower();
+                    <tr>
+                        <td>@a.StartTime.ToString("ddd, dd MMM yyyy")<br /><span class="hint">@a.StartTime.ToString("h:mm tt")</span></td>
+                        <td>@a.PetName</td>
+                        <td>@a.ServiceType</td>
+                        <td>@a.StaffName</td>
+                        <td class="bk-num">RM @a.Price.ToString("0.00")</td>
+                        <td><span class="@badge">@a.Status</span></td>
+                        <td class="bk-row-actions">
+                            <a asp-action="Details" asp-route-id="@a.Id">View</a>
+                            @if (a.CanCancel)
+                            {
+                                <a asp-action="Cancel" asp-route-id="@a.Id" class="bk-link-danger">Cancel</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
