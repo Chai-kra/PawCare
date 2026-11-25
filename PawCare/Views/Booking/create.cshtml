@@ -1,80 +1,91 @@
 ﻿@using PawCare.Models
 @model BookingVM
 @{
-    ViewBag.Title = "Book An Appointment";
+    ViewBag.Title = "Book an appointment";
+    ViewBag.HideTitle = true;
+}
+@section head {
+    <link rel="stylesheet" href="/css/booking.css" asp-append-version="true">
 }
 
-@section head{
-    <link rel="stylesheet" href="/css/booking.css" asp-append-version="true" />
-}
+<form asp-action="Create" method="post" id="bookingForm" class="bk-paper"
+      data-slots-url="@Url.Action("Slots")"
+      data-initial-slot="@Model.SlotTime">
 
-<p class="lead">Choose your pet and a service package shown here. We will show you the time that are available</p>
+    <h2 class="bk-title">Pet Grooming Appointment Form</h2>
+    <p class="bk-intro">Booking as <strong>@User.Identity?.Name</strong>. We already have your contact details from your account.</p>
 
-@if (!Model.Pets.Any())
-{
-    <div class="alert bk-warn">You have no pets registered. Please add a pet before booking</div>
-}
+    @if (!Model.Pets.Any())
+    {
+        <div class="alert bk-warn">You have no pets registered yet. Please add a pet before booking.</div>
+    }
 
-<form asp-action="Create" method="post" id="bookingForm" class="panel bk-form" data-slots-url="@Url.Action("Slots")"
-    data-initial-slot="@Model.SlotTime">
     <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
-    <div class="bk-grid">
-        <div class="form-group">
-            <label asp-for="PetId"></label>
-            <select asp-for="PetId" asp-items="Model.Pets" class="bk-input">
-                <option value="">Any available staff</option>
-            </select>
-        </div>
 
-        <div class="form-group bk-full">
-            <label>Service Package</label>
-            <div class="bk-services">
-                @foreach (var p in Model.Packages)
-                {
-                        var pkgId = "pkg_" + p.Id;
-                        <label class="bk-service" for="@pkgId">
-                            <input type="radio" class="package-radio" name="ServicePackageId" id="@pkgId" value="@p.Id"
-                            data-duration="@p.TimeAmount" data-price="@p.Price.ToString("0.00")" 
-                            checked="@(Model.ServicePackageId == p.Id)" />
-                            <span class="bk-service-name">@p.ServiceType</span>
-                            <span class="bk-service-meta">RM@p.Price.ToString("0.00") &middot; @p.TimeAmount min</span>
-                        </label>
-                    }
-            </div>
-            
-            <span asp-validation-for="ServicePackageId" class="error-message"></span>
-            <span id="packageError" class="error-message"></span>
-            <p class="bk-total">Total: <strong id="sumPrice">RM 0.00</strong> &middot; <span id="sumDuration">0 min</span></p>
-        </div>
+    <div class="form-group">
+        <label asp-for="PetId">Which buddy is this appointment for?</label>
+        <select asp-for="PetId" asp-items="Model.Pets" class="bk-input">
+            <option value="">Select your pet</option>
+        </select>
+        <span asp-validation-for="PetId" class="error-message"></span>
+    </div>
 
-        <div class="form-group">
-            <label asp-for="Date"></label>
-            <input asp-for="Date" type="date" class="bk-input" 
-            min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                   max="@DateTime.Today.AddDays(BookingRules.MaxAdvanceDays).ToString("yyyy-MM-dd")" />\
-            <span asp-validation-for="Date" class="error-message"></span>
-        </div>
+    <div class="form-group">
+        <label asp-for="Date">What day do you prefer for the appointment?</label>
+        <input asp-for="Date" type="date" class="bk-input"
+               min="@DateTime.Today.ToString("yyyy-MM-dd")"
+               max="@DateTime.Today.AddDays(BookingRules.MaxAdvanceDays).ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="Date" class="error-message"></span>
+    </div>
 
-        <div class="form-group bk-full">
-            <label>Available Times</label>
-            <div id="slotBox">
-                <p class="hint">Please Select a service package to see available times. </p>
-            </div>
-            <input type="hidden" asp-for="SlotTime" />
-            <span asp-validation-for="SlotTime" class="error-message"></span>
-            <span id="slotError" class="error-message"></span>
+    <div class="form-group">
+        <label>Which service do you choose this time?</label>
+        <div class="bk-services">
+            @foreach (var p in Model.Packages)
+            {
+                var pkgId = "pkg_" + p.Id;
+                <label class="bk-service" for="@pkgId">
+                    <input type="radio" class="package-radio" name="ServicePackageId" id="@pkgId" value="@p.Id"
+                           data-duration="@p.TimeAmount" data-price="@p.Price.ToString("0.00")"
+                           checked="@(Model.ServicePackageId == p.Id)" />
+                    <span>
+                        <span class="bk-service-name">@p.ServiceType</span>
+                        <span class="bk-service-meta">RM @p.Price.ToString("0.00") &middot; @p.TimeAmount min</span>
+                    </span>
+                </label>
+            }
         </div>
-        
-        <div class="form-group bk-full">
-            <label asp-for="Notes"></label>
-            <textarea asp-for="Notes" class="bk-input" rows="3"></textarea>
-            <span asp-validation-for="Notes" class="error-message"></span>
+        <span asp-validation-for="ServicePackageId" class="error-message"></span>
+        <span id="packageError" class="error-message"></span>
+        <p class="bk-total">Total: <strong id="sumPrice">RM 0.00</strong> &middot; <span id="sumDuration">0 min</span></p>
+    </div>
+
+    <div class="form-group">
+        <label>Which time suits you?</label>
+        <div id="slotBox">
+            <p class="hint">Select a date and a service to see available times.</p>
         </div>
+        <input type="hidden" asp-for="SlotTime" />
+        <span asp-validation-for="SlotTime" class="error-message"></span>
+        <span id="slotError" class="error-message"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StaffId">Do you prefer a particular groomer? (optional)</label>
+        <select asp-for="StaffId" asp-items="Model.Staff" class="bk-input">
+            <option value="">Any available staff</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Notes">Please specify any additional details we should be aware of:</label>
+        <textarea asp-for="Notes" class="bk-input" rows="4"></textarea>
+        <span asp-validation-for="Notes" class="error-message"></span>
     </div>
 
     <div class="bk-actions">
-        <button type="submit" class="btn btn-primary">Book Appointment</button>
-        <a asp-action="Index" class="btn btn-outline">Back</a>
+        <button type="submit" class="btn btn-primary">Book appointment</button>
+        <a asp-action="Menu" class="btn btn-outline">Back</a>
     </div>
 </form>
 
