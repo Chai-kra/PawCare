@@ -18,10 +18,8 @@ public class BookingDateAttribute : ValidationAttribute
         return ValidationResult.Success;   // [Required] handles null
     }
 
-    
-}
 
-public record SlotOption(DateTime Start, List<string> FreeStaffIds);
+}
 
 public class PackageOptionVM
 {
@@ -33,13 +31,27 @@ public class PackageOptionVM
 
 public class BookingVM
 {
+    // Buddy (pet) details. An existing pet of this customer with the same name is reused,
+    // otherwise a new Pet row is created when the booking is saved.
+    [Required(ErrorMessage = "Please enter your buddy's name.")]
+    [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
+    [Display(Name = "Your buddy's name")]
+    public string? PetName { get; set; }
+
+    [Required(ErrorMessage = "Please choose dog or cat.")]
+    public string? PetType { get; set; }        // "Dog" or "Cat"
+
+    [Required(ErrorMessage = "Please choose male or female.")]
+    public string? PetGender { get; set; }      // "Male" or "Female"
+
+    [Required(ErrorMessage = "Please enter the breed.")]
+    [MaxLength(50, ErrorMessage = "Breed cannot exceed 50 characters.")]
+    [Display(Name = "Breed")]
+    public string? PetBreed { get; set; }
+
     [Required(ErrorMessage = "Please select a service package.")]
     [Display(Name = "Service package")]
     public string? ServicePackageId { get; set; }
-
-    [Required(ErrorMessage = "Please select a pet.")]
-    [Display(Name = "Pet")]
-    public string? PetId { get; set; }
 
     [Display(Name = "Preferred staff")]
     public string? StaffId { get; set; }   // null/empty = any available
@@ -57,7 +69,6 @@ public class BookingVM
     [Display(Name = "Notes for the groomer (optional)")]
     public string? Notes { get; set; }
 
-    public List<SelectListItem> Pets { get; set; } = [];
     public List<SelectListItem> Staff { get; set; } = [];
     public List<PackageOptionVM> Packages { get; set; } = [];
 }

@@ -8,7 +8,7 @@ public static class BookingRules
     public const int HoldMinutes = 15; // an unpaid booking holds the slot for 15 minutes only
     public const int MinCancelHours = 24; // customer can cancel only if appointment is more than 24 hours away
 
-    // Opening hours (same as the Contact page): Mon-Fri 9:00-18:00, Sat 9:00-16:00, Sunday closed
+   
     public static bool IsOpen(DateTime date)
     {
         return date.DayOfWeek != DayOfWeek.Sunday;
@@ -26,7 +26,7 @@ public static class BookingRules
         return date.Date.AddHours(18);
     }
 
-    // Is this start time inside opening hours, on the slot grid, and far enough in the future?
+   
     public static bool IsBookableTime(DateTime start, int minutes)
     {
         return IsOpen(start)

@@ -1,0 +1,19 @@
+﻿@model List<DateTime>
+
+@if (!Model.Any())
+{
+    <div class="alert bk-warn">No times are available for this selection. Try another date or staff member (we are closed on Sundays).</div>
+}
+else
+{
+    <div class="bk-slots">
+        @foreach (var time in Model)
+        {
+            var id = "slot_" + time.ToString("HHmm");
+            <label class="bk-slot" for="@id">
+                <input type="radio" class="slot-radio" name="slotPick" id="@id" value="@time.ToString("HH:mm")" />
+                <span>@time.ToString("h:mm tt")</span>
+            </label>
+        }
+    </div>
+}

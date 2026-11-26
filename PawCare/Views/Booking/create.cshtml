@@ -15,19 +15,35 @@
     <h2 class="bk-title">Pet Grooming Appointment Form</h2>
     <p class="bk-intro">Booking as <strong>@User.Identity?.Name</strong>. We already have your contact details from your account.</p>
 
-    @if (!Model.Pets.Any())
-    {
-        <div class="alert bk-warn">You have no pets registered yet. Please add a pet before booking.</div>
-    }
-
     <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
 
     <div class="form-group">
-        <label asp-for="PetId">Which buddy is this appointment for?</label>
-        <select asp-for="PetId" asp-items="Model.Pets" class="bk-input">
-            <option value="">Select your pet</option>
-        </select>
-        <span asp-validation-for="PetId" class="error-message"></span>
+        <label asp-for="PetName">Your buddy's name?</label>
+        <input asp-for="PetName" class="bk-input" autocomplete="off" />
+        <span asp-validation-for="PetName" class="error-message"></span>
+    </div>
+
+    <div class="form-group">
+        <div class="bk-choices">
+            <label class="bk-choice"><input asp-for="PetType" type="radio" value="Dog" id="PetType_Dog" /> It's a cute dog</label>
+            <label class="bk-choice"><input asp-for="PetType" type="radio" value="Cat" id="PetType_Cat" /> It's a cute cat</label>
+        </div>
+        <span asp-validation-for="PetType" class="error-message"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Is your buddy a boy or a girl?</label>
+        <div class="bk-choices">
+            <label class="bk-choice"><input asp-for="PetGender" type="radio" value="Male" id="PetGender_Male" /> Male</label>
+            <label class="bk-choice"><input asp-for="PetGender" type="radio" value="Female" id="PetGender_Female" /> Female</label>
+        </div>
+        <span asp-validation-for="PetGender" class="error-message"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PetBreed">What breed is your buddy?</label>
+        <input asp-for="PetBreed" class="bk-input" autocomplete="off" />
+        <span asp-validation-for="PetBreed" class="error-message"></span>
     </div>
 
     <div class="form-group">
@@ -39,22 +55,18 @@
     </div>
 
     <div class="form-group">
-        <label>Which service do you choose this time?</label>
-        <div class="bk-services">
+        <label asp-for="ServicePackageId">Which service do you choose this time?</label>
+        <select asp-for="ServicePackageId" class="bk-input" id="ServicePackageId">
+            <option value="" data-price="0.00" data-duration="0">-- Select a service --</option>
             @foreach (var p in Model.Packages)
             {
-                var pkgId = "pkg_" + p.Id;
-                <label class="bk-service" for="@pkgId">
-                    <input type="radio" class="package-radio" name="ServicePackageId" id="@pkgId" value="@p.Id"
-                           data-duration="@p.TimeAmount" data-price="@p.Price.ToString("0.00")"
-                           checked="@(Model.ServicePackageId == p.Id)" />
-                    <span>
-                        <span class="bk-service-name">@p.ServiceType</span>
-                        <span class="bk-service-meta">RM @p.Price.ToString("0.00") &middot; @p.TimeAmount min</span>
-                    </span>
-                </label>
+                <option value="@p.Id"
+                        data-duration="@p.TimeAmount"
+                        data-price="@p.Price.ToString("0.00")">
+                    @p.ServiceType (RM @p.Price.ToString("0.00") · @p.TimeAmount min)
+                </option>
             }
-        </div>
+        </select>
         <span asp-validation-for="ServicePackageId" class="error-message"></span>
         <span id="packageError" class="error-message"></span>
         <p class="bk-total">Total: <strong id="sumPrice">RM 0.00</strong> &middot; <span id="sumDuration">0 min</span></p>

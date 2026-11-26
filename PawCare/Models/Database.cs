@@ -59,6 +59,8 @@ namespace PawCare.Models
         public String Name { get; set; }
         [Required, MaxLength(10)]
         public String Type { get; set; }
+        [Required, MaxLength(10)]
+        public String Gender { get; set; }
         [Required, MaxLength(50)]
         public String Breed { get; set; }
 

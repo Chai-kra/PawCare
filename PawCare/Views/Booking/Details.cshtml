@@ -1,0 +1,55 @@
+﻿@using PawCare.Models
+@model AppointmentDetailVM
+@{
+    ViewBag.Title = "Appointment " + Model.Id;
+    var badge = "bk-badge bk-" + Model.Status.ToString().ToLower();
+}
+@section head {
+    <link rel="stylesheet" href="/css/booking.css" asp-append-version="true">
+}
+
+<div class="panel">
+    <dl class="bk-dl">
+        <dt>Status</dt>
+        <dd><span class="@badge">@Model.Status</span></dd>
+        <dt>Date</dt>
+        <dd>@Model.StartTime.ToString("dddd, dd MMM yyyy")</dd>
+        <dt>Time</dt>
+        <dd>@Model.StartTime.ToString("h:mm tt") &ndash; @Model.EndTime.ToString("h:mm tt")</dd>
+        <dt>Pet</dt>
+        <dd>@Model.PetName</dd>
+        <dt>Service</dt>
+        <dd>@Model.ServiceType (@Model.TimeAmount min)</dd>
+        <dt>Handled by</dt>
+        <dd>@Model.StaffName</dd>
+        <dt>Price</dt>
+        <dd>RM @Model.Price.ToString("0.00")</dd>
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <dt>Notes</dt>
+            <dd>@Model.Notes</dd>
+        }
+        @if (!string.IsNullOrEmpty(Model.CancelReason))
+        {
+            <dt>Cancel reason</dt>
+            <dd>@Model.CancelReason</dd>
+        }
+    </dl>
+</div>
+
+<div class="bk-actions">
+    <a asp-action="Index" class="btn btn-outline">Back to my appointments</a>
+
+    @if (Model.Status == AppointmentStatus.PendingPayment)
+    {
+        @* TODO (Payment module): replace this dev-only form with the Stripe checkout link *@
+        <form asp-action="SimulatePayment" asp-route-id="@Model.Id" method="post">
+            <button type="submit" class="btn btn-primary">Simulate payment (dev only)</button>
+        </form>
+    }
+
+    @if (Model.CanCancel)
+    {
+        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn bk-btn-danger">Cancel appointment</a>
+    }
+</div>
