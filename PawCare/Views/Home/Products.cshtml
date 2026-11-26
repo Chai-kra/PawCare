@@ -1,0 +1,61 @@
+﻿@model IEnumerable<PawCare.Models.Product>
+@{
+    ViewBag.Title = "Products";
+}
+@*just for test ,inline css*@
+<div style="display:flex; gap:32px; align-items:flex-start;">
+
+    <aside style="flex:0 0 200px; position:sticky; top:90px;">
+        <h2 style="font-size:1.1rem;">Categories</h2>
+        <ul style="list-style:none; margin:0 0 24px; padding:0;">
+            <li><a asp-action="Products">All</a></li>
+            @foreach (var c in ViewBag.Categories)
+            {
+                <li><a asp-action="Products" asp-route-categoryId="@c.Id">@c.Name</a></li>
+            }
+        </ul>
+
+        <h2 style="font-size:1.1rem;">Price (RM)</h2>
+        <form method="get" class="form">
+
+            <input type="hidden" name="categoryId" value="@(ViewData["CategoryId"] as string ?? "")" />
+
+            <label for="minPrice">Min</label>
+            <input id="minPrice" name="minPrice" type="number" step="0.01" min="0"
+                   value="@(ViewData["MinPrice"])" />
+
+            <label for="maxPrice">Max</label>
+            <input id="maxPrice" name="maxPrice" type="number" step="0.01" min="0"
+                   value="@(ViewData["MaxPrice"])" />
+
+            <button type="submit">Apply</button>
+            <a asp-action="Products">Clear</a>
+        </form>
+    </aside>
+
+    <div style="flex:1 1 auto;">
+        <p>@Model.Count() item(s)</p>
+
+        @foreach (var p in Model)
+        {
+            <div class="menu-item">
+                <div>
+                    <h3>@p.Name</h3>
+                    <p>@p.Description</p>
+                    <small>@p.Category?.Name &middot; In stock: @p.Stock</small>
+                </div>
+                <div class="menu-price" style="align-items:flex-end;">
+                    <strong>RM @p.Price</strong>
+                    <form asp-controller="Cart" asp-action="Add" method="post" style="margin:8px 0 0;">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <input type="hidden" name="from" value="products" />
+                        <button type="submit" class="btn btn-primary"
+                                style="padding:6px 14px; font-size:.85rem;">
+                            Add to cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

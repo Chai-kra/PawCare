@@ -20,6 +20,8 @@ namespace PawCare.Models
         // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+
     }
 
     [Index(nameof(Email), IsUnique = true)]
@@ -93,6 +95,7 @@ namespace PawCare.Models
         public String Id { get; set; }
         [Required, MaxLength(100)]
         public String Name { get; set; }
+        public List<Product> Products { get; set; } = [];
     }
 
     public class Service
@@ -105,6 +108,20 @@ namespace PawCare.Models
         public String Description { get; set; }
         public decimal Price { get; set; }
         public int Duration { get; set; }
+        [Required, MaxLength(4)]
+        public string CategoryId { get; set; }
+        public Category Category { get; set; }
+    }
+    public class Product
+    {
+        [Key, MaxLength(7)]
+        public String Id { get; set; }
+        [Required, MaxLength(100)]
+        public String Name { get; set; }
+        [MaxLength(200)]
+        public String Description { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
         [Required, MaxLength(4)]
         public string CategoryId { get; set; }
         public Category Category { get; set; }

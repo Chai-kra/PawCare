@@ -22,6 +22,67 @@ namespace PawCare.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PawCare.Models.Appointment", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("PetId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("ServicePackageId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<string>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("PetId");
+
+                    b.HasIndex("ServicePackageId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Appointments");
+                });
+
             modelBuilder.Entity("PawCare.Models.Category", b =>
                 {
                     b.Property<string>("Id")
@@ -58,7 +119,6 @@ namespace PawCare.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -114,6 +174,39 @@ namespace PawCare.Migrations
                     b.ToTable("Pets");
                 });
 
+            modelBuilder.Entity("PawCare.Models.Product", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<string>("CategoryId")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("PawCare.Models.Service", b =>
                 {
                     b.Property<string>("Id")
@@ -147,6 +240,28 @@ namespace PawCare.Migrations
                     b.ToTable("Services");
                 });
 
+            modelBuilder.Entity("PawCare.Models.ServicePackage", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8, 2)");
+
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TimeAmount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServicePackages");
+                });
+
             modelBuilder.Entity("PawCare.Models.Staff", b =>
                 {
                     b.Property<string>("Id")
@@ -167,9 +282,49 @@ namespace PawCare.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Staff");
+                });
+
+            modelBuilder.Entity("PawCare.Models.Appointment", b =>
+                {
+                    b.HasOne("PawCare.Models.Customer", "Customers")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PawCare.Models.Pet", "Pets")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PawCare.Models.ServicePackage", "ServicePackages")
+                        .WithMany()
+                        .HasForeignKey("ServicePackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PawCare.Models.Staff", "Staffs")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customers");
+
+                    b.Navigation("Pets");
+
+                    b.Navigation("ServicePackages");
+
+                    b.Navigation("Staffs");
                 });
 
             modelBuilder.Entity("PawCare.Models.Pet", b =>
@@ -183,6 +338,17 @@ namespace PawCare.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("PawCare.Models.Product", b =>
+                {
+                    b.HasOne("PawCare.Models.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("PawCare.Models.Service", b =>
                 {
                     b.HasOne("PawCare.Models.Category", "Category")
@@ -192,6 +358,11 @@ namespace PawCare.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("PawCare.Models.Category", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("PawCare.Models.Customer", b =>
