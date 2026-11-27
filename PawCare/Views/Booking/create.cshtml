@@ -55,18 +55,22 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="ServicePackageId">Which service do you choose this time?</label>
-        <select asp-for="ServicePackageId" class="bk-input" id="ServicePackageId">
-            <option value="" data-price="0.00" data-duration="0">-- Select a service --</option>
+        <label>Which service do you choose this time?</label>
+        <div class="bk-services">
             @foreach (var p in Model.Packages)
             {
-                <option value="@p.Id"
-                        data-duration="@p.TimeAmount"
-                        data-price="@p.Price.ToString("0.00")">
-                    @p.ServiceType (RM @p.Price.ToString("0.00") · @p.TimeAmount min)
-                </option>
+                var pkgId = "pkg_" + p.Id;
+                <label class="bk-service" for="@pkgId">
+                    <input type="radio" class="package-radio" name="ServicePackageId" id="@pkgId" value="@p.Id"
+                           data-duration="@p.TimeAmount" data-price="@p.Price.ToString("0.00")"
+                           checked="@(Model.ServicePackageId == p.Id)" />
+                    <span>
+                        <span class="bk-service-name">@p.ServiceType</span>
+                        <span class="bk-service-meta">RM @p.Price.ToString("0.00") &middot; @p.TimeAmount min</span>
+                    </span>
+                </label>
             }
-        </select>
+        </div>
         <span asp-validation-for="ServicePackageId" class="error-message"></span>
         <span id="packageError" class="error-message"></span>
         <p class="bk-total">Total: <strong id="sumPrice">RM 0.00</strong> &middot; <span id="sumDuration">0 min</span></p>
@@ -90,7 +94,7 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Notes">Please specify any additional details we should be aware of:</label>
+        <label asp-for="Notes">Any additional description we should aware of?:</label>
         <textarea asp-for="Notes" class="bk-input" rows="4"></textarea>
         <span asp-validation-for="Notes" class="error-message"></span>
     </div>
