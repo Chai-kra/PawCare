@@ -10,18 +10,15 @@ namespace PawCare.Models
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Staff> Staff { get; set; }
-
-        //Booking module
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Service> Services { get; set; }
+        public DbSet<Product> Products { get; set; }
+
+        // Booking module
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<ServicePackage> ServicePackages { get; set; }
 
-        //todo later
-        // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Product> Products { get; set; }
-
     }
 
     [Index(nameof(Email), IsUnique = true)]
@@ -38,7 +35,7 @@ namespace PawCare.Models
         public String Phone { get; set; }
 
         // Hash only; never store or log plain passwords.
-        [MaxLength(200)]
+        [Required, MaxLength(200)]
         public String PasswordHash { get; set; }
 
         // Email verification (the token is stored hashed).
@@ -50,7 +47,6 @@ namespace PawCare.Models
         public List<Pet> Pets { get; set; } = [];
 
         // INSERT (loyalty points): public int LoyaltyPoints { get; set; }
-        // INSERT (appointments):   public List<Appointment> Appointments { get; set; } = [];
     }
 
     public class Pet
@@ -112,6 +108,7 @@ namespace PawCare.Models
         public string CategoryId { get; set; }
         public Category Category { get; set; }
     }
+
     public class Product
     {
         [Key, MaxLength(7)]

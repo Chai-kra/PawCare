@@ -1,1 +1,50 @@
-﻿
+/* ===== Booking module ===== */
+.bk-paper { max-width: 640px; margin: 0 auto; padding: 32px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+.bk-title { font-size: 1.6rem; font-weight: 800; color: var(--c-950); margin-bottom: 8px; }
+.bk-intro { color: var(--muted); margin-bottom: 20px; }
+
+.bk-input { width: 100%; padding: .65rem .85rem; border: 1px solid #5f8f9b; border-radius: 10px; font: inherit; color: var(--ink); background: #fff; }
+textarea.bk-input { resize: vertical; }
+
+.bk-choices { display: flex; flex-wrap: wrap; gap: 16px; }
+.bk-choice { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+
+.bk-services { display: grid; gap: 8px; }
+.bk-service { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font-weight: 400; }
+.bk-service:hover { background: var(--c-50); }
+.bk-service:has(input:checked) { border-color: var(--c-600); background: var(--c-50); }
+.bk-service-name { display: block; font-weight: 600; }
+.bk-service-meta { display: block; color: var(--muted); font-size: .9rem; }
+.bk-total { margin: 10px 0 0; }
+
+.bk-slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.bk-slot { padding: 6px 14px; border: 1px solid var(--c-600); border-radius: 999px; cursor: pointer; font-weight: 500; margin: 0; }
+.bk-slot input { position: absolute; opacity: 0; pointer-events: none; }
+.bk-slot:hover { background: var(--c-50); }
+.bk-slot:has(input:checked) { background: var(--c-700); color: #fff; }
+.bk-warn { background: #fffaeb; border-color: #fec84b; color: #93370d; }
+
+.bk-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.bk-actions form { margin: 0; }
+.bk-btn-danger { background: #b42318; color: #fff; }
+.bk-btn-danger:hover { background: #912018; color: #fff; }
+
+.bk-dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 0; }
+.bk-dl dt { color: var(--muted); }
+.bk-dl dd { margin: 0; font-weight: 600; }
+
+.bk-table-wrap { overflow-x: auto; }
+.bk-table { width: 100%; border-collapse: collapse; }
+.bk-table th, .bk-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.bk-table th { color: var(--muted); font-weight: 600; }
+.bk-num { text-align: right !important; white-space: nowrap; }
+.bk-row-actions { white-space: nowrap; }
+.bk-row-actions a { margin-right: 10px; }
+.bk-link-danger { color: #b42318; }
+
+.bk-badge { display: inline-block; padding: 2px 12px; border-radius: 999px; font-size: .85rem; font-weight: 600; background: var(--c-100); color: var(--c-800); }
+.bk-pendingpayment { background: #fffaeb; color: #93370d; }
+.bk-confirmed { background: #ecfdf3; color: #067647; }
+.bk-completed { background: var(--c-100); color: var(--c-800); }
+.bk-cancelled { background: #fef3f2; color: #912018; }
+.bk-noshow { background: #f2f4f7; color: #344054; }

@@ -1,36 +1,39 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PawCare.Models;
-
 namespace PawCare.Controllers;
 
 public class HomeController(Database db) : Controller
 {
-    public IActionResult Index() => View();
+    // GET: Home/Index
+    public IActionResult Index()
+    {
+        return View();
+    }
 
+    // GET: Home/Services
     public IActionResult Services(string? name)
     {
         name = name?.Trim() ?? "";
-        var services = db.Services
-            .Where (s => s.Name.Contains(name))
-            .ToList();
+
+        var m = db.Services
+                  .Include(s => s.Category)
+                  .Where(s => s.Name.Contains(name))
+                  .ToList();
+
         ViewData["ServiceName"] = name;
-        return View(services);
+        return View(m);
     }
 
-    public IActionResult About() => View();
-
-    public IActionResult Contact() => View();
-
+    // GET: Home/Products
     public IActionResult Products(string? categoryId, decimal? minPrice, decimal? maxPrice)
     {
         var q = db.Products.Include(p => p.Category).AsQueryable();
+
         if (!string.IsNullOrEmpty(categoryId))
             q = q.Where(p => p.CategoryId == categoryId);
         if (minPrice.HasValue)
             q = q.Where(p => p.Price >= minPrice.Value);
         if (maxPrice.HasValue)
             q = q.Where(p => p.Price <= maxPrice.Value);
+
         ViewData["CategoryId"] = categoryId;
         ViewData["MinPrice"] = minPrice;
         ViewData["MaxPrice"] = maxPrice;
@@ -40,5 +43,17 @@ public class HomeController(Database db) : Controller
                                .ToList();
 
         return View(q.OrderBy(p => p.Price).ToList());
+    }
+
+    // GET: Home/About
+    public IActionResult About()
+    {
+        return View();
+    }
+
+    // GET: Home/Contact
+    public IActionResult Contact()
+    {
+        return View();
     }
 }

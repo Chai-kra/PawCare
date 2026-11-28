@@ -1,5 +1,3 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PawCare.Models;
 using PawCare.ViewModels;
 
 namespace PawCare.Controllers;
@@ -101,6 +99,14 @@ public class CartController(Database db) : Controller
     public IActionResult Clear()
     {
         HttpContext.Session.Remove(CartKey);
+        return RedirectToAction("Index");
+    }
+
+    // POST /Cart/Checkout  (placeholder: the Cart view posts here, but there is no order table yet)
+    [HttpPost]
+    public IActionResult Checkout()
+    {
+        TempData["Error"] = "Checkout is not available yet.";
         return RedirectToAction("Index");
     }
 

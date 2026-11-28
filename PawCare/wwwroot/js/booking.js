@@ -1,4 +1,4 @@
-﻿$(function () {
+$(function () {
     const $form = $('#bookingForm');
     if ($form.length === 0) return;
 
@@ -25,10 +25,10 @@
 
     function loadSlots() {
         $slotTime.val('');
-        $('#slotError').text('')
+        $('#slotError').text('');
 
         if (!selectedPackage() || !$date.val()) {
-            $slotBox.html('<p class="hint>Select a service package and date to see availability')
+            $slotBox.html('<p class="hint">Select a service and a date to see available times.</p>');
             return;
         }
 
@@ -68,7 +68,7 @@
     $form.on('submit', function (e) {
         let ok = true;
         if (!selectedPackage()) {
-            $('#packageError').text('Please select a service package.');
+            $('#packageError').text('Please select a service.');
             ok = false;
         }
         if (!$slotTime.val()) {

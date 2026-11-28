@@ -1,0 +1,29 @@
+@model CancelVM
+@{
+    ViewBag.Title = "Cancel appointment";
+}
+@section head {
+    <link rel="stylesheet" href="/css/booking.css" asp-append-version="true">
+}
+
+<div class="panel">
+    <p>Appointment <strong>@Model.Id</strong> for <strong>@Model.PetName</strong> on
+       <strong>@Model.StartTime.ToString("ddd, dd MMM yyyy h:mm tt")</strong>.</p>
+
+    <form asp-action="Cancel" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+        <div class="form-group">
+            <label asp-for="Reason"></label>
+            <textarea asp-for="Reason" class="bk-input" rows="4"></textarea>
+            <span asp-validation-for="Reason" class="error-message"></span>
+        </div>
+
+        <div class="bk-actions">
+            <button type="submit" class="btn bk-btn-danger">Confirm cancellation</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline">Keep appointment</a>
+        </div>
+    </form>
+</div>

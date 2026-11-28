@@ -1,4 +1,4 @@
-﻿@using PawCare.Models
+@using PawCare.Models
 @model AppointmentDetailVM
 @{
     ViewBag.Title = "Appointment " + Model.Id;
@@ -38,7 +38,7 @@
 </div>
 
 <div class="bk-actions">
-    <a asp-action="Index" class="btn btn-outline">Back to my appointments</a>
+    <a asp-action="Menu" class="btn btn-outline">Back to my appointments</a>
 
     @if (Model.Status == AppointmentStatus.PendingPayment)
     {
