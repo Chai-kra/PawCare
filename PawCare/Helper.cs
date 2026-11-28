@@ -11,6 +11,10 @@ namespace PawCare;
 
 public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
 {
+    // ------------------------------------------------------------------------
+    // Security Helper Functions
+    // ------------------------------------------------------------------------
+
     private readonly PasswordHasher<object> ph = new();
 
     public string HashPassword(string password)
@@ -24,6 +28,8 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
                 == PasswordVerificationResult.Success;
     }
 
+    // NameIdentifier = customer id (BookingController reads it via User.CustomerId())
+    // Name           = display name (shown in the header)
     public void SignIn(string id, string name, string email, string role, bool rememberMe)
     {
         List<Claim> claims = [
@@ -48,6 +54,7 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
         ct.HttpContext!.SignOutAsync();
     }
 
+    // Random token for email links. Only its hash is stored in the database.
     public string RandomToken()
     {
         return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
@@ -57,6 +64,10 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
     {
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
     }
+
+    // ------------------------------------------------------------------------
+    // Email (prints to the console when Smtp:Host is not configured)
+    // ------------------------------------------------------------------------
 
     public void SendEmail(string to, string subject, string body)
     {
@@ -81,6 +92,10 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
         var from = cfg["Smtp:From"] ?? "no-reply@pawcare.example";
         client.Send(new MailMessage(from, to, subject, body));
     }
+
+    // ------------------------------------------------------------------------
+    // Google reCAPTCHA (disabled when the keys are empty)
+    // ------------------------------------------------------------------------
 
     public string RecaptchaSiteKey => cfg["Recaptcha:SiteKey"] ?? "";
 
@@ -109,7 +124,7 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
         }
         catch (Exception)
         {
-            return false;
+            return false;   // fail closed if the check cannot complete
         }
     }
 }
