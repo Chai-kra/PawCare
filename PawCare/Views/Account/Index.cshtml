@@ -1,14 +1,23 @@
-@model PawCare.ViewModels.AccountDashboardViewModel
+@model Customer
 @{
     ViewBag.Title = "My account";
 }
 
-<p class="lead">Welcome back, <strong>@Model.Username</strong>.</p>
+<p class="lead">Welcome back, <strong>@Model.Name</strong>.</p>
 
 <div class="dashboard-grid">
     <section class="panel">
         <h2>Profile</h2>
-        <p>@Model.Username<br>@Model.Email</p>
+        @await Html.PartialAsync("_Avatar", Model.PhotoURL ?? "")
+        <p>
+            @Model.Name<br>
+            @Model.Email<br>
+            @(string.IsNullOrEmpty(Model.Phone) ? "No phone number yet" : Model.Phone)
+        </p>
+        <p>
+            <a asp-action="UpdateProfile">Edit profile</a> |
+            <a asp-action="ChangePassword">Change password</a>
+        </p>
     </section>
 
     @* INSERT (pet managing): filter queries by User.CustomerId() *@
@@ -17,10 +26,9 @@
         <p>Your pet profiles will appear here.</p>
     </section>
 
-    @* INSERT (appointment making): take CustomerId from User.CustomerId(), not the form *@
-    <section class="panel panel-placeholder">
+    <section class="panel">
         <h2>Appointments</h2>
-        <p>Your upcoming visits will appear here.</p>
+        <p><a asp-controller="Booking" asp-action="Menu">View my appointments</a></p>
     </section>
 
     @* INSERT (loyalty points): award points server-side only *@

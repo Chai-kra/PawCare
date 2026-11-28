@@ -1,5 +1,5 @@
-@model PawCare.ViewModels.LoginViewModel
-@inject PawCare.Services.IRecaptchaService Recaptcha
+@model LoginVM
+@inject Helper hp
 @{
     ViewBag.Title = "Login";
     ViewBag.HideTitle = true;
@@ -28,10 +28,10 @@
             <label asp-for="RememberMe">Remember me</label>
         </div>
 
-        @if (Recaptcha.Enabled)
+        @if (hp.RecaptchaEnabled)
         {
             <div class="form-group">
-                <div class="g-recaptcha" data-sitekey="@Recaptcha.SiteKey"></div>
+                <div class="g-recaptcha" data-sitekey="@hp.RecaptchaSiteKey"></div>
             </div>
         }
 
@@ -40,12 +40,13 @@
 
     <div class="login-links">
         <a asp-action="Register">Create an account</a>
+        <a asp-action="ForgotPassword">Forgot your password?</a>
         <a asp-action="ResendVerification">Resend verification email</a>
     </div>
 </div>
 
 @section foot {
-    @if (Recaptcha.Enabled)
+    @if (hp.RecaptchaEnabled)
     {
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     }
