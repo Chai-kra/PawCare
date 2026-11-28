@@ -22,6 +22,8 @@ namespace PawCare.Models
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
 
+       
+
     }
 
     [Index(nameof(Email), IsUnique = true)]

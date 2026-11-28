@@ -1,82 +1,69 @@
 ﻿$(function () {
     const $form = $('#bookingForm');
-    if ($form.length === 0) return;
+    if (!$form.length) return;
 
     const slotsUrl = $form.data('slots-url');
-    let pendingSlot = $form.data('initial-slot') || '';
-
-    const $staff = $('#StaffId');
-    const $petName = $('#PetName');
-    const $date = $('#Date');
-    const $slotBox = $('#slotBox');
-    const $slotTime = $('#SlotTime');
+    let initialSlot = $form.data('initial-slot') || '';
 
     function selectedPackage() {
         return $('.package-radio:checked').val() || '';
     }
 
     function updateSummary() {
-        const $p = $('.package-radio:checked');
-        const minutes = $p.length ? Number($p.data('duration')) : 0;
-        const price = $p.length ? Number($p.data('price')) : 0;
+        const $pkg = $('.package-radio:checked');
+        const minutes = $pkg.length ? Number($pkg.data('duration')) || 0 : 0;
+        const price = $pkg.length ? Number($pkg.data('price')) || 0 : 0;
+
         $('#sumDuration').text(minutes + ' min');
         $('#sumPrice').text('RM ' + price.toFixed(2));
     }
 
     function loadSlots() {
-        $slotTime.val('');
-        $('#slotError').text('')
+        const date = $('#Date').val();
+        const servicePackageId = selectedPackage();
 
-        if (!selectedPackage() || !$date.val()) {
-            $slotBox.html('<p class="hint>Select a service package and date to see availability')
+        $('#SlotTime').val('');
+
+        if (!date || !servicePackageId) {
+            $('#slotBox').html('<p class="hint">Select a date and a service to see available times.</p>');
             return;
         }
 
-        $slotBox.html('<p class="hint">Loading available times...</p>');
+        $('#slotBox').html('<p class="hint">Loading available times...</p>');
 
-        $.ajax({
-            url: slotsUrl,
-            type: 'GET',
-            data: {
-                date: $date.val(),
-                servicePackageId: selectedPackage(),
-                staffId: $staff.val(),
-                petName: $petName.val()
-            }
+        $.get(slotsUrl, {
+            date: date,
+            servicePackageId: servicePackageId,
+            staffId: $('#StaffId').val(),
+            petName: $('#PetName').val()
         })
             .done(function (html) {
-                $slotBox.html(html);
-                if (pendingSlot) {
-                    $slotBox.find('.slot-radio[value="' + pendingSlot + '"]').prop('checked', true);
-                    $slotTime.val(pendingSlot);
-                    pendingSlot = '';
+                $('#slotBox').html(html);
+
+                if (initialSlot) {
+                    const $radio = $('#slotBox .slot-radio[value="' + initialSlot + '"]');
+                    if ($radio.length) {
+                        $radio.prop('checked', true);
+                        $('#SlotTime').val(initialSlot);
+                    }
+                    initialSlot = '';
                 }
             })
             .fail(function () {
-                $slotBox.html('<p class="error-message">Could not load time slots. Please try again.</p>');
+                $('#slotBox').html('<p class="error-message">Unable to load time slots.</p>');
             });
     }
 
-    $slotBox.on('change', '.slot-radio', function () {
-        $slotTime.val($(this).val());
-        $('#slotError').text('');
+    $('#slotBox').on('change', '.slot-radio', function () {
+        $('#SlotTime').val($(this).val());
     });
 
-    $('.package-radio').on('change', function () { $('#packageError').text(''); updateSummary(); loadSlots(); });
-    $staff.add($petName).add($date).on('change', loadSlots);
-
-    $form.on('submit', function (e) {
-        let ok = true;
-        if (!selectedPackage()) {
-            $('#packageError').text('Please select a service package.');
-            ok = false;
-        }
-        if (!$slotTime.val()) {
-            $('#slotError').text('Please select a time slot.');
-            ok = false;
-        }
-        if (!ok) e.preventDefault();
+    $(document).on('change', '.package-radio', function () {
+        updateSummary();
+        loadSlots();
     });
+
+    $('#Date, #StaffId, #PetName').on('change', loadSlots);
 
     updateSummary();
     loadSlots();
