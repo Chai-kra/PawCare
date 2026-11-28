@@ -17,11 +17,9 @@ namespace PawCare.Models
         public DbSet<ServicePackage> ServicePackages { get; set; }
 
         //todo later
-        // INSERT (appointments):    public DbSet<Appointment> Appointments { get; set; }
         // INSERT (loyalty points):  public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
-
     }
 
     [Index(nameof(Email), IsUnique = true)]
@@ -37,6 +35,10 @@ namespace PawCare.Models
         [MaxLength(15)]
         public String Phone { get; set; }
 
+        // Profile photo: GUID file name inside wwwroot/photos
+        [MaxLength(100)]
+        public String PhotoURL { get; set; }
+
         // Hash only; never store or log plain passwords.
         [MaxLength(200)]
         public String PasswordHash { get; set; }
@@ -47,10 +49,14 @@ namespace PawCare.Models
         public String VerifyTokenHash { get; set; }
         public DateTime? VerifyTokenExpires { get; set; }
 
+        // Password reset (separate from verification so the two never collide; token stored hashed).
+        [MaxLength(64)]
+        public String ResetTokenHash { get; set; }
+        public DateTime? ResetTokenExpires { get; set; }
+
         public List<Pet> Pets { get; set; } = [];
 
         // INSERT (loyalty points): public int LoyaltyPoints { get; set; }
-        // INSERT (appointments):   public List<Appointment> Appointments { get; set; } = [];
     }
 
     public class Pet
@@ -73,6 +79,9 @@ namespace PawCare.Models
         public Customer Customer { get; set; }
     }
 
+    // Login looks staff up by email, so it must be unique.
+    // IDs must start with IdPrefix.Staff ('S'), e.g. S000001.
+    [Index(nameof(Email), IsUnique = true)]
     public class Staff
     {
         [MaxLength(7)]
@@ -83,10 +92,17 @@ namespace PawCare.Models
         public String Email { get; set; }
         [MaxLength(15)]
         public String Phone { get; set; }
+        // "Staff" or "Admin"
         [Required, MaxLength(10)]
         public String Role { get; set; }
 
-        // INSERT (staff login): add PasswordHash like Customer, then sign in
+        // Null until the staff member sets a password via "Forgot password".
+        [MaxLength(200)]
+        public String PasswordHash { get; set; }
+
+        [MaxLength(64)]
+        public String ResetTokenHash { get; set; }
+        public DateTime? ResetTokenExpires { get; set; }
     }
 
     public class Category
@@ -112,6 +128,7 @@ namespace PawCare.Models
         public string CategoryId { get; set; }
         public Category Category { get; set; }
     }
+
     public class Product
     {
         [Key, MaxLength(7)]

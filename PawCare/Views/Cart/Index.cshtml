@@ -1,6 +1,11 @@
 ﻿@model IEnumerable<PawCare.ViewModels.CartItemVM>
 @{
     ViewBag.Title = "Cart";
+    var total = ViewData["Total"] is decimal t ? t : 0m;
+}
+
+@section head {
+    <link rel="stylesheet" href="/css/cart.css" asp-append-version="true">
 }
 
 <p>@Model.Count() item(s)</p>
@@ -8,14 +13,17 @@
 @if (!Model.Any())
 {
     <p>Your cart is empty.</p>
-    <p><a asp-controller="Home" asp-action="Products">Browse products</a></p>
+    <p>
+        <a asp-controller="Home" asp-action="Products">Browse products</a> &middot;
+        <a asp-controller="Home" asp-action="Services">Browse services</a>
+    </p>
 }
 else
 {
-    <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+    <table class="cart-table">
         <thead>
-            <tr style="text-align:left; border-bottom:1px solid #ddd;">
-                <th style="padding:8px 0;">Item</th>
+            <tr>
+                <th>Item</th>
                 <th>Type</th>
                 <th>Price</th>
                 <th>Qty</th>
@@ -26,16 +34,24 @@ else
         <tbody>
             @foreach (var it in Model)
             {
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:8px 0;">@it.Name</td>
+                <tr>
+                    <td>@it.Name</td>
                     <td>@it.Type</td>
-                    <td>RM @it.Price</td>
+                    <td>RM @it.Price.ToString("0.00")</td>
                     <td>@it.Qty</td>
-                    <td>RM @(it.Price * it.Qty)</td>
+                    <td>RM @((it.Price * it.Qty).ToString("0.00"))</td>
                     <td>
-                        <form asp-action="Remove" method="post">
+                        <form asp-action="Update" method="post" class="cart-qty">
                             <input type="hidden" name="id" value="@it.Id" />
-                            <button type="submit" class="btn btn-outline">Remove</button>
+
+                            <button type="submit" name="op" value="minus" class="cart-qty-btn" aria-label="Decrease"> &minus; </button>
+
+                            @if (it.Type == "Product")
+                            {
+                                <button type="submit" name="op" value="plus" class="cart-qty-btn" aria-label="Increase"> + </button>
+                            }
+
+                            <button type="submit" name="op" value="remove" class="btn btn-outline"> Remove </button>
                         </form>
                     </td>
                 </tr>
@@ -43,13 +59,14 @@ else
         </tbody>
     </table>
 
-    <p><strong>Total: RM @ViewData["Total"]</strong></p>
+    <p class="cart-total">Total: RM @total.ToString("0.00")</p>
 
-    <form asp-action="Clear" method="post">
-        <button type="submit" class="btn btn-outline">Clear cart</button>
-    </form>
-    <form asp-action="Checkout" method="post">
-        <button type="submit" class="btn btn-primary">Proceed to Checkout</button>
-    </form>
-
+    <div class="cart-actions">
+        <form asp-action="Clear" method="post">
+            <button type="submit" class="btn btn-outline">Clear cart</button>
+        </form>
+        <form asp-action="Checkout" method="post">
+            <button type="submit" class="btn btn-primary">Proceed to checkout</button>
+        </form>
+    </div>
 }

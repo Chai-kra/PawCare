@@ -8,7 +8,7 @@ public class CartController(Database db) : Controller
 {
     private const string CartKey = "Cart";
 
-    // GET /Cart
+    // GET /Cart  --show the list
     public IActionResult Index()
     {
         var lines = ReadCart();
@@ -32,7 +32,7 @@ public class CartController(Database db) : Controller
                 });
                 total += product.Price * line.Qty;
             }
-            else if (service != null)   // service: qty is always 1
+            else if (service != null)
             {
                 items.Add(new CartItemVM
                 {
@@ -44,6 +44,7 @@ public class CartController(Database db) : Controller
                 });
                 total += service.Price;
             }
+            // item deleted from the database: silently skipped
         }
 
         ViewData["Total"] = total;
@@ -54,13 +55,14 @@ public class CartController(Database db) : Controller
     [HttpPost]
     public IActionResult Add(string id, string? from)
     {
-        // server side check: the id must exist in one of the two tables
+        // server side check: the id must exist in Products or Services
         var product = db.Products.Find(id);
         var service = product == null ? db.Services.Find(id) : null;
+
         if (product == null && service == null)
         {
-            TempData["Error"] = "That item does not exist.";
-            return RedirectToAction("Products", "Home");
+            TempData["Error"] = "That item is not available.";
+            return Back(from);
         }
 
         var lines = ReadCart();
@@ -70,28 +72,64 @@ public class CartController(Database db) : Controller
         {
             lines.Add(new CartLine { Id = id, Qty = 1 });
         }
-        else if (product != null)          // products can be added again
+        else if (product != null)
         {
+            // stock check before increasing the quantity
             if (line.Qty + 1 > product.Stock)
             {
-                TempData["Error"] = $"Only {product.Stock} left in stock.";
+                TempData["Error"] = $"{product.Name}: only {product.Stock} left in stock.";
                 return Back(from);
             }
             line.Qty += 1;
         }
-        // service already in cart: keep qty 1, one booking is one slot
+        else
+        {
+            TempData["Error"] = $"{service!.Name} is already in your cart.";
+            return Back(from);
+        }
 
         SaveCart(lines);
-        TempData["Success"] = (product != null ? product.Name : service!.Name) + " added to cart.";
+        TempData["Success"] = $"{product?.Name ?? service!.Name} added to cart.";
         return Back(from);
     }
 
-    // POST /Cart/Remove
+    // POST /Cart/Update
     [HttpPost]
-    public IActionResult Remove(string id)
+    public IActionResult Update(string id, string op)
     {
         var lines = ReadCart();
-        lines.RemoveAll(l => l.Id == id);
+        var line = lines.FirstOrDefault(l => l.Id == id);
+        if (line == null) return RedirectToAction("Index");
+
+        var product = db.Products.Find(id);
+
+        switch (op)
+        {
+            case "plus":
+                if (product == null)
+                {
+                    TempData["Error"] = "A service can only be booked once.";
+                }
+                else if (line.Qty + 1 > product.Stock)
+                {
+                    TempData["Error"] = $"{product.Name}: only {product.Stock} left in stock.";
+                }
+                else
+                {
+                    line.Qty += 1;
+                }
+                break;
+
+            case "minus":
+                line.Qty -= 1;
+                if (line.Qty <= 0) lines.Remove(line);
+                break;
+
+            case "remove":
+                lines.Remove(line);
+                break;
+        }
+
         SaveCart(lines);
         return RedirectToAction("Index");
     }
@@ -104,33 +142,49 @@ public class CartController(Database db) : Controller
         return RedirectToAction("Index");
     }
 
-    // ---- helpers ----
+    // POST /Cart/Checkout
+    // -- placeholder, the order/payment module is not wired yet
+    [HttpPost]
+    public IActionResult Checkout()
+    {
+        if (!ReadCart().Any())
+        {
+            TempData["Error"] = "Your cart is empty.";
+        }
+        else
+        {
+            TempData["Error"] = "Payment will do later....";
+        }
+        return RedirectToAction("Index");
+    }
+
+    // ---------- Session helpers ----------
+
     private List<CartLine> ReadCart()
     {
         var text = HttpContext.Session.GetString(CartKey) ?? "";
         var list = new List<CartLine>();
+
         foreach (var part in text.Split(',', StringSplitOptions.RemoveEmptyEntries))
         {
             var bits = part.Split(':');
-            list.Add(new CartLine { Id = bits[0], Qty = int.Parse(bits[1]) });
+            if (bits.Length != 2) continue;
+            if (!int.TryParse(bits[1], out var qty) || qty < 1) continue;
+            if (!db.Products.Any(p => p.Id == bits[0]) && !db.Services.Any(s => s.Id == bits[0]))
+                continue;                      // id no longer exists, drop it
+            list.Add(new CartLine { Id = bits[0], Qty = qty });
         }
         return list;
     }
-
     private void SaveCart(List<CartLine> lines)
     {
         var text = string.Join(",", lines.Select(l => $"{l.Id}:{l.Qty}"));
         HttpContext.Session.SetString(CartKey, text);
     }
 
+    // send the user back to the page they clicked from
     private IActionResult Back(string? from) =>
         from == "services"
             ? RedirectToAction("Services", "Home")
             : RedirectToAction("Products", "Home");
-}
-
-public class CartLine
-{
-    public string Id { get; set; } = "";
-    public int Qty { get; set; }
 }
