@@ -2,14 +2,12 @@ namespace PawCare.Controllers;
 
 public class AccountController(Database db, Helper hp) : Controller
 {
-    // GET: Account/Register
     public IActionResult Register()
     {
         if (User.Identity!.IsAuthenticated) return RedirectToAction("Index");
         return View();
     }
 
-    // POST: Account/Register
     [HttpPost]
     public IActionResult Register(RegisterVM vm)
     {
@@ -22,7 +20,6 @@ public class AccountController(Database db, Helper hp) : Controller
             return View(vm);
         }
 
-        // Next id: C000001, C000002, ...
         string max = db.Customers.Max(c => c.Id) ?? "C000000";
         int n = int.Parse(max[1..]) + 1;
 
@@ -45,7 +42,6 @@ public class AccountController(Database db, Helper hp) : Controller
         return RedirectToAction("Login");
     }
 
-    // GET: Account/VerifyEmail
     public IActionResult VerifyEmail(string? email, string? token)
     {
         var address = (email ?? "").Trim().ToLower();
@@ -75,13 +71,11 @@ public class AccountController(Database db, Helper hp) : Controller
         return RedirectToAction("Login");
     }
 
-    // GET: Account/ResendVerification
     public IActionResult ResendVerification()
     {
         return View();
     }
 
-    // POST: Account/ResendVerification
     [HttpPost]
     public IActionResult ResendVerification(ResendVerificationVM vm)
     {
@@ -99,12 +93,10 @@ public class AccountController(Database db, Helper hp) : Controller
             SendVerification(m, token);
         }
 
-        // Same message either way, so accounts cannot be discovered.
         TempData["Success"] = "If that email belongs to an unverified account, we have sent a new verification link.";
         return RedirectToAction("Login");
     }
 
-    // GET: Account/Login
     public IActionResult Login(string? returnUrl)
     {
         if (User.Identity!.IsAuthenticated) return RedirectToAction("Index");
@@ -112,7 +104,6 @@ public class AccountController(Database db, Helper hp) : Controller
         return View();
     }
 
-    // POST: Account/Login
     [HttpPost]
     public IActionResult Login(LoginVM vm, string? returnUrl)
     {
@@ -146,7 +137,6 @@ public class AccountController(Database db, Helper hp) : Controller
         return RedirectToAction("Index");
     }
 
-    // POST: Account/Logout
     [HttpPost]
     public IActionResult Logout()
     {
@@ -154,7 +144,6 @@ public class AccountController(Database db, Helper hp) : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // GET: Account/Index (customer dashboard)
     [Authorize(Roles = "Customer")]
     public IActionResult Index()
     {
@@ -162,7 +151,6 @@ public class AccountController(Database db, Helper hp) : Controller
 
         if (m == null)
         {
-            // Account was removed: clear the cookie.
             hp.SignOut();
             return RedirectToAction("Login");
         }
@@ -170,13 +158,11 @@ public class AccountController(Database db, Helper hp) : Controller
         return View(m);
     }
 
-    // GET: Account/AccessDenied
     public IActionResult AccessDenied()
     {
         return View();
     }
 
-    // Returns false if the email could not be sent.
     private bool SendVerification(Customer m, string token)
     {
         var link = Url.Action("VerifyEmail", "Account", new { email = m.Email, token }, Request.Scheme);
