@@ -1,272 +1,194 @@
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PawCare.Models;
-using PawCare.Services;
-using PawCare.ViewModels;
-
 namespace PawCare.Controllers;
 
-public class AccountController(Database db, IPasswordHasher<Customer> hasher, IEmailService mailer, IRecaptchaService recaptcha) : Controller
+public class AccountController(Database db, Helper hp) : Controller
 {
-    // Keeps response time similar whether or not the email exists.
-    private static readonly string DummyHash = new PasswordHasher<Customer>().HashPassword(new Customer(), "dummy-Password1");
-    private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(24);
-    private static readonly TimeSpan ResendCooldown = TimeSpan.FromMinutes(1);
-
-    // ---------- Register ----------
-    [AllowAnonymous]
-    [HttpGet]
+    // GET: Account/Register
     public IActionResult Register()
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction(nameof(Index));
-        return View(new RegisterViewModel());
+        if (User.Identity!.IsAuthenticated) return RedirectToAction("Index");
+        return View();
     }
 
-    [AllowAnonymous]
+    // POST: Account/Register
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel vm)
+    public IActionResult Register(RegisterVM vm)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var address = vm.Email.Trim().ToLowerInvariant();
-        if (await db.Customers.AnyAsync(c => c.Email == address))
+        var email = vm.Email.Trim().ToLower();
+        if (db.Customers.Any(c => c.Email == email))
         {
-            ModelState.AddModelError(nameof(vm.Email), "This email is already registered.");
+            ModelState.AddModelError("Email", "Duplicated Email.");
             return View(vm);
         }
 
-        var customer = new Customer
+        // Next id: C000001, C000002, ...
+        string max = db.Customers.Max(c => c.Id) ?? "C000000";
+        int n = int.Parse(max[1..]) + 1;
+
+        var token = hp.RandomToken();
+        var m = new Customer
         {
-            Id = await NextCustomerIdAsync(),
+            Id = $"C{n:D6}",
             Name = vm.Username.Trim(),
-            Email = address
+            Email = email,
+            PasswordHash = hp.HashPassword(vm.Password),
+            VerifyTokenHash = hp.HashToken(token),
+            VerifyTokenExpires = DateTime.UtcNow.AddHours(24),
         };
-        customer.PasswordHash = hasher.HashPassword(customer, vm.Password);
-        var token = IssueVerificationToken(customer);
+        db.Customers.Add(m);
+        db.SaveChanges();
 
-        db.Customers.Add(customer);
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            ModelState.AddModelError(string.Empty, "We could not create your account. Please try again.");
-            return View(vm);
-        }
-
-        var sent = await SendVerificationEmailAsync(customer, token);
-        TempData["Success"] = sent
+        TempData["Success"] = SendVerification(m, token)
             ? "Account created. Check your email for the verification link."
             : "Account created, but we could not send the verification email. Use \"Resend verification email\" below.";
-        return RedirectToAction(nameof(Login));
+        return RedirectToAction("Login");
     }
 
-    // ---------- Email verification ----------
-    [AllowAnonymous]
-    [HttpGet]
-    public async Task<IActionResult> VerifyEmail(string? email, string? token)
+    // GET: Account/VerifyEmail
+    public IActionResult VerifyEmail(string? email, string? token)
     {
-        var address = (email ?? "").Trim().ToLowerInvariant();
-        var customer = await db.Customers.FirstOrDefaultAsync(c => c.Email == address);
+        var address = (email ?? "").Trim().ToLower();
+        var m = db.Customers.FirstOrDefault(c => c.Email == address);
 
-        if (customer is { EmailConfirmed: true })
+        if (m != null && m.EmailConfirmed)
         {
             TempData["Success"] = "Your email is already verified. You can log in.";
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction("Login");
         }
 
-        var valid = customer is not null
-            && !string.IsNullOrEmpty(token)
-            && customer.VerifyTokenHash is not null
-            && customer.VerifyTokenExpires > DateTime.UtcNow
-            && CryptographicOperations.FixedTimeEquals(
-                   Encoding.UTF8.GetBytes(HashToken(token)),
-                   Encoding.UTF8.GetBytes(customer.VerifyTokenHash));
-
-        if (!valid)
+        if (m == null ||
+            m.VerifyTokenHash == null ||
+            m.VerifyTokenExpires < DateTime.UtcNow ||
+            m.VerifyTokenHash != hp.HashToken(token ?? ""))
         {
             TempData["Error"] = "That verification link is invalid or has expired. Request a new one below.";
-            return RedirectToAction(nameof(ResendVerification));
+            return RedirectToAction("ResendVerification");
         }
 
-        customer!.EmailConfirmed = true;
-        customer.VerifyTokenHash = null;
-        customer.VerifyTokenExpires = null;
-        await db.SaveChangesAsync();
+        m.EmailConfirmed = true;
+        m.VerifyTokenHash = null;
+        m.VerifyTokenExpires = null;
+        db.SaveChanges();
 
         TempData["Success"] = "Email verified. You can log in now.";
-        return RedirectToAction(nameof(Login));
+        return RedirectToAction("Login");
     }
 
-    [AllowAnonymous]
-    [HttpGet]
-    public IActionResult ResendVerification() => View(new ResendVerificationViewModel());
+    // GET: Account/ResendVerification
+    public IActionResult ResendVerification()
+    {
+        return View();
+    }
 
-    [AllowAnonymous]
+    // POST: Account/ResendVerification
     [HttpPost]
-    public async Task<IActionResult> ResendVerification(ResendVerificationViewModel vm)
+    public IActionResult ResendVerification(ResendVerificationVM vm)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var address = vm.Email.Trim().ToLowerInvariant();
-        var customer = await db.Customers.FirstOrDefaultAsync(c => c.Email == address);
+        var email = vm.Email.Trim().ToLower();
+        var m = db.Customers.FirstOrDefault(c => c.Email == email);
 
-        if (customer is { EmailConfirmed: false } && !IssuedRecently(customer))
+        if (m != null && !m.EmailConfirmed)
         {
-            var token = IssueVerificationToken(customer);
-            await db.SaveChangesAsync();
-            await SendVerificationEmailAsync(customer, token);
+            var token = hp.RandomToken();
+            m.VerifyTokenHash = hp.HashToken(token);
+            m.VerifyTokenExpires = DateTime.UtcNow.AddHours(24);
+            db.SaveChanges();
+            SendVerification(m, token);
         }
 
-        // Same response either way, so accounts can't be discovered.
+        // Same message either way, so accounts cannot be discovered.
         TempData["Success"] = "If that email belongs to an unverified account, we have sent a new verification link.";
-        return RedirectToAction(nameof(Login));
+        return RedirectToAction("Login");
     }
 
-    // ---------- Login ----------
-    [AllowAnonymous]
-    [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    // GET: Account/Login
+    public IActionResult Login(string? returnUrl)
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction(nameof(Index));
+        if (User.Identity!.IsAuthenticated) return RedirectToAction("Index");
         ViewBag.ReturnUrl = returnUrl;
-        return View(new LoginViewModel());
+        return View();
     }
 
-    [AllowAnonymous]
+    // POST: Account/Login
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
+    public IActionResult Login(LoginVM vm, string? returnUrl)
     {
         ViewBag.ReturnUrl = returnUrl;
         if (!ModelState.IsValid) return View(vm);
 
-        if (!await recaptcha.VerifyAsync(Request.Form["g-recaptcha-response"]))
+        if (!hp.VerifyRecaptcha(Request.Form["g-recaptcha-response"]))
         {
-            ModelState.AddModelError(string.Empty, "Please confirm you are not a robot.");
+            ModelState.AddModelError("", "Please confirm you are not a robot.");
             return View(vm);
         }
 
-        var address = vm.Email.Trim().ToLowerInvariant();
-        var customer = await db.Customers.FirstOrDefaultAsync(c => c.Email == address);
-        // INSERT (lockout): track failed attempts here.
+        var email = vm.Email.Trim().ToLower();
+        var m = db.Customers.FirstOrDefault(c => c.Email == email);
 
-        var result = hasher.VerifyHashedPassword(customer ?? new Customer(), customer?.PasswordHash ?? DummyHash, vm.Password);
-        if (customer is null || result == PasswordVerificationResult.Failed)
+        if (m == null || !hp.VerifyPassword(m.PasswordHash, vm.Password))
         {
-            // Generic message: don't reveal which emails exist.
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            ModelState.AddModelError("", "Invalid email or password.");
             return View(vm);
         }
 
-        // Checked after the password so unverified status isn't leaked.
-        if (!customer.EmailConfirmed)
+        if (!m.EmailConfirmed)
         {
-            ModelState.AddModelError(string.Empty, "Please verify your email address before logging in.");
+            ModelState.AddModelError("", "Please verify your email address before logging in.");
             return View(vm);
         }
 
-        if (result == PasswordVerificationResult.SuccessRehashNeeded)
-        {
-            customer.PasswordHash = hasher.HashPassword(customer, vm.Password);
-            await db.SaveChangesAsync();
-        }
+        hp.SignIn(m.Id, m.Name, m.Email, "Customer", vm.RememberMe);
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, customer.Id),
-            new(ClaimTypes.Name, customer.Name),
-            new(ClaimTypes.Email, customer.Email),
-            new(ClaimTypes.Role, AppRoles.Customer)
-        };
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
-
-        var properties = new AuthenticationProperties { IsPersistent = vm.RememberMe };
-        if (vm.RememberMe) properties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14);
-
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
-
-        // Local URLs only (prevents open redirects).
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return LocalRedirect(returnUrl);
-        return RedirectToAction(nameof(Index));
+        if (Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl!);
+        return RedirectToAction("Index");
     }
 
-    // ---------- Logout (POST only) ----------
+    // POST: Account/Logout
     [HttpPost]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        hp.SignOut();
         return RedirectToAction("Index", "Home");
     }
 
-    // ---------- Customer dashboard ----------
-    [Authorize(Roles = AppRoles.Customer)]
-    public async Task<IActionResult> Index()
+    // GET: Account/Index (customer dashboard)
+    [Authorize(Roles = "Customer")]
+    public IActionResult Index()
     {
-        var id = User.CustomerId();
-        var vm = await db.Customers.AsNoTracking()
-            .Where(c => c.Id == id)
-            .Select(c => new AccountDashboardViewModel(c.Name, c.Email))
-            .FirstOrDefaultAsync();
+        var m = db.Customers.Find(User.CustomerId());
 
-        if (vm is null)
+        if (m == null)
         {
             // Account was removed: clear the cookie.
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction(nameof(Login));
+            hp.SignOut();
+            return RedirectToAction("Login");
         }
-        return View(vm);
+
+        return View(m);
     }
 
-    [AllowAnonymous]
-    public IActionResult AccessDenied() => View();
-
-    // ---------- helpers ----------
-    // The raw token goes in the email; only its hash is stored.
-    private static string IssueVerificationToken(Customer customer)
+    // GET: Account/AccessDenied
+    public IActionResult AccessDenied()
     {
-        var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-        customer.VerifyTokenHash = HashToken(token);
-        customer.VerifyTokenExpires = DateTime.UtcNow.Add(TokenLifetime);
-        return token;
+        return View();
     }
 
-    private static string HashToken(string token) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
-
-    // True if a token was issued within the resend cooldown.
-    private static bool IssuedRecently(Customer customer) =>
-        customer.VerifyTokenExpires is { } expires && expires > DateTime.UtcNow + (TokenLifetime - ResendCooldown);
-
-    private async Task<bool> SendVerificationEmailAsync(Customer customer, string token)
+    // Returns false if the email could not be sent.
+    private bool SendVerification(Customer m, string token)
     {
-        var link = Url.Action(nameof(VerifyEmail), "Account", new { email = customer.Email, token }, Request.Scheme);
+        var link = Url.Action("VerifyEmail", "Account", new { email = m.Email, token }, Request.Scheme);
         try
         {
-            await mailer.SendAsync(
-                customer.Email,
-                "Verify your PawCare email",
-                $"Hi {customer.Name},\n\nConfirm your email address by opening this link (valid for 24 hours):\n{link}\n\nIf you did not create this account, you can ignore this message.");
+            hp.SendEmail(m.Email, "Verify your PawCare email",
+                $"Hi {m.Name},\n\nConfirm your email address by opening this link (valid for 24 hours):\n{link}\n\nIf you did not create this account, you can ignore this message.");
             return true;
         }
         catch (Exception)
         {
             return false;
         }
-    }
-
-    // Ids look like C000001 (fits the 7-character key).
-    private async Task<string> NextCustomerIdAsync()
-    {
-        var last = await db.Customers.OrderByDescending(c => c.Id).Select(c => c.Id).FirstOrDefaultAsync();
-        var number = last is null ? 0 : int.Parse(last[1..]);
-        return $"C{number + 1:D6}";
     }
 }
