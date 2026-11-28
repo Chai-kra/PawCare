@@ -1,13 +1,11 @@
-using MailKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
-using MimeKit;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 
 namespace PawCare;
 
@@ -69,30 +67,19 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
             return;
         }
 
-        var message = new MimeMessage();
-        message.From.Add(MailboxAddress.Parse(cfg["Smtp:From"] ?? "no-reply@pawcare.example"));
-        message.To.Add(MailboxAddress.Parse(to));
-        message.Subject = subject;
-        message.Body = new TextPart("plain") { Text = body };
-
-        var port = cfg.GetValue("Smtp:Port", 587);
-        var ssl = cfg.GetValue("Smtp:EnableSsl", true);
-
-        var security = !ssl ? SecureSocketOptions.None
-                     : port == 465 ? SecureSocketOptions.SslOnConnect
-                     : SecureSocketOptions.StartTls;
-
-        using var client = new SmtpClient();
-        client.Connect(host, port, security);
+        using var client = new SmtpClient(host, cfg.GetValue("Smtp:Port", 587))
+        {
+            EnableSsl = cfg.GetValue("Smtp:EnableSsl", true)
+        };
 
         var user = cfg["Smtp:User"];
         if (!string.IsNullOrEmpty(user))
         {
-            client.Authenticate(user, cfg["Smtp:Password"]);
+            client.Credentials = new NetworkCredential(user, cfg["Smtp:Password"]);
         }
 
-        client.Send(message);
-        client.Disconnect(true);
+        var from = cfg["Smtp:From"] ?? "no-reply@pawcare.example";
+        client.Send(new MailMessage(from, to, subject, body));
     }
 
     public string RecaptchaSiteKey => cfg["Recaptcha:SiteKey"] ?? "";
