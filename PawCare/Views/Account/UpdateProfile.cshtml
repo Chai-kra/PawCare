@@ -1,0 +1,73 @@
+﻿@model UpdateProfileVM
+@{
+    ViewBag.Title = "Update profile";
+    ViewBag.HideTitle = true;
+}
+
+<div class="login-container">
+    <h2>Update Profile</h2>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-error"></div>
+
+    <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Email</label>
+            <div>@Model.Email</div>
+            <p class="hint">Your email cannot be changed here.</p>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="login-controller" autocomplete="nickname" />
+            <span asp-validation-for="Name" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Phone"></label>
+            <input asp-for="Phone" class="login-controller" placeholder="+60 12-345 6789" autocomplete="tel" />
+            <p class="hint">Optional. 8 to 14 digits, with an optional leading +.</p>
+            <span asp-validation-for="Phone" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Photo"></label>
+            @await Html.PartialAsync("_Avatar", Model.PhotoURL ?? "")
+            <input asp-for="Photo" accept="image/jpeg,image/png" />
+            <p class="hint">JPG or PNG, up to 1MB. It is cropped to a 200x200 square.</p>
+            <span asp-validation-for="Photo" class="error-message"></span>
+            <span id="photoClientError" class="error-message"></span>
+        </div>
+
+        <button type="submit" class="btn-login">Save changes</button>
+    </form>
+
+    <div class="login-links">
+        <a asp-action="ChangePassword">Change password</a>
+        <a asp-action="Index">Back to my account</a>
+    </div>
+</div>
+
+@section foot {
+    <script>
+        // Photo preview (client side only; the server validates everything again)
+        $('#Photo').on('change', function() {
+            var img = document.getElementById('avatarPreview');
+            var f = this.files[0];
+            var err = $('#photoClientError').text('');
+
+            img.dataset.src = img.dataset.src || img.src;
+
+            if (f && f.size > 1048576) {
+                err.text('Photo size cannot be more than 1MB.');
+                this.value = '';
+                img.src = img.dataset.src;
+            } else if (f && f.type.startsWith('image/')) {
+                img.onload = function() { URL.revokeObjectURL(img.src); };
+                img.src = URL.createObjectURL(f);
+            } else {
+                img.src = img.dataset.src;
+                this.value = '';
+            }
+        });
+    </script>
+}

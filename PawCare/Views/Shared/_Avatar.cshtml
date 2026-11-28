@@ -1,0 +1,8 @@
+@model string
+@{
+    // Inline placeholder so no extra image file is needed
+    var src = string.IsNullOrEmpty(Model)
+        ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23cffafe'/><circle cx='100' cy='80' r='36' fill='%2367e8f9'/><circle cx='100' cy='190' r='70' fill='%2367e8f9'/></svg>"
+        : "/photos/" + Model;
+}
+<img id="avatarPreview" class="avatar" src="@src" alt="Profile photo" width="120" height="120">

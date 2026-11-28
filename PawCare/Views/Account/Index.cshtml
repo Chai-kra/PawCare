@@ -8,7 +8,16 @@
 <div class="dashboard-grid">
     <section class="panel">
         <h2>Profile</h2>
-        <p>@Model.Name<br>@Model.Email</p>
+        @await Html.PartialAsync("_Avatar", Model.PhotoURL ?? "")
+        <p>
+            @Model.Name<br>
+            @Model.Email<br>
+            @(string.IsNullOrEmpty(Model.Phone) ? "No phone number yet" : Model.Phone)
+        </p>
+        <p>
+            <a asp-action="UpdateProfile">Edit profile</a> |
+            <a asp-action="ChangePassword">Change password</a>
+        </p>
     </section>
 
     @* INSERT (pet managing): filter queries by User.CustomerId() *@
