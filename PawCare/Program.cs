@@ -5,7 +5,14 @@ global using System.ComponentModel.DataAnnotations;
 global using PawCare;
 global using PawCare.Models;
 
+using PawCare.Extensions;
+using PawCare.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Loads PawCare/Secret.env (Smtp__Host=... becomes Smtp:Host).
+// Added after the default sources, so it overrides appsettings.
+builder.Configuration.AddSecretsEnv(builder.Environment.ContentRootPath);
 
 // Validate anti-forgery tokens on every POST.
 builder.Services.AddControllersWithViews(options =>
@@ -17,6 +24,7 @@ Directory.CreateDirectory(dataDirectory);
 builder.Services.AddSqlServer<Database>(
     builder.Configuration.GetConnectionString("Database")!.Replace("|DataDirectory|", dataDirectory));
 
+builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<Helper>();
 builder.Services.AddAuthentication().AddCookie();
 builder.Services.AddHttpContextAccessor();

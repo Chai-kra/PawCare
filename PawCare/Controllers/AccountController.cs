@@ -1,6 +1,12 @@
+using PawCare.Services;
+
 namespace PawCare.Controllers;
 
-public class AccountController(Database db, Helper hp) : Controller
+public class AccountController(
+    Database db,
+    Helper hp,
+    IEmailService mailer,
+    ILogger<AccountController> logger) : Controller
 {
     // GET: Account/Register
     public IActionResult Register()
@@ -11,7 +17,7 @@ public class AccountController(Database db, Helper hp) : Controller
 
     // POST: Account/Register
     [HttpPost]
-    public IActionResult Register(RegisterVM vm)
+    public async Task<IActionResult> Register(RegisterVM vm)
     {
         if (!ModelState.IsValid) return View(vm);
 
@@ -39,7 +45,7 @@ public class AccountController(Database db, Helper hp) : Controller
         db.Customers.Add(m);
         db.SaveChanges();
 
-        TempData["Success"] = SendVerification(m, token)
+        TempData["Success"] = await SendVerificationAsync(m, token)
             ? "Account created. Check your email for the verification link."
             : "Account created, but we could not send the verification email. Use \"Resend verification email\" below.";
         return RedirectToAction("Login");
@@ -83,7 +89,7 @@ public class AccountController(Database db, Helper hp) : Controller
 
     // POST: Account/ResendVerification
     [HttpPost]
-    public IActionResult ResendVerification(ResendVerificationVM vm)
+    public async Task<IActionResult> ResendVerification(ResendVerificationVM vm)
     {
         if (!ModelState.IsValid) return View(vm);
 
@@ -96,7 +102,7 @@ public class AccountController(Database db, Helper hp) : Controller
             m.VerifyTokenHash = hp.HashToken(token);
             m.VerifyTokenExpires = DateTime.UtcNow.AddHours(24);
             db.SaveChanges();
-            SendVerification(m, token);
+            await SendVerificationAsync(m, token);
         }
 
         // Same message either way, so accounts cannot be discovered.
@@ -128,7 +134,7 @@ public class AccountController(Database db, Helper hp) : Controller
         var email = vm.Email.Trim().ToLower();
         var m = db.Customers.FirstOrDefault(c => c.Email == email);
 
-        if (m == null || !hp.VerifyPassword(m.PasswordHash, vm.Password))
+        if (m == null || m.PasswordHash == null || !hp.VerifyPassword(m.PasswordHash, vm.Password))
         {
             ModelState.AddModelError("", "Invalid email or password.");
             return View(vm);
@@ -176,18 +182,19 @@ public class AccountController(Database db, Helper hp) : Controller
         return View();
     }
 
-    // Returns false if the email could not be sent.
-    private bool SendVerification(Customer m, string token)
+    // Returns false if the email could not be sent (the reason is logged).
+    private async Task<bool> SendVerificationAsync(Customer m, string token)
     {
         var link = Url.Action("VerifyEmail", "Account", new { email = m.Email, token }, Request.Scheme);
         try
         {
-            hp.SendEmail(m.Email, "Verify your PawCare email",
+            await mailer.SendAsync(m.Email, "Verify your PawCare email",
                 $"Hi {m.Name},\n\nConfirm your email address by opening this link (valid for 24 hours):\n{link}\n\nIf you did not create this account, you can ignore this message.");
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Could not send verification email to {Email}", m.Email);
             return false;
         }
     }

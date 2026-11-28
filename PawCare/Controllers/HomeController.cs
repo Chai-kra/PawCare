@@ -13,11 +13,14 @@ public class HomeController(Database db) : Controller
     {
         name = name?.Trim() ?? "";
         var services = db.Services
-            .Where (s => s.Name.Contains(name))
-                  .ToList();
+            .Include(s => s.Category)
+            .Where(s => s.Name.Contains(name))
+            .OrderBy(s => s.CategoryId)
+            .ThenBy(s => s.Name)
+            .ToList();
 
         ViewData["ServiceName"] = name;
-        return View(m);
+        return View(services);
     }
 
     // GET: Home/Products

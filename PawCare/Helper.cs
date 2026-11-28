@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -63,34 +61,6 @@ public class Helper(IHttpContextAccessor ct, IConfiguration cfg)
     public string HashToken(string token)
     {
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
-    }
-
-    // ------------------------------------------------------------------------
-    // Email (prints to the console when Smtp:Host is not configured)
-    // ------------------------------------------------------------------------
-
-    public void SendEmail(string to, string subject, string body)
-    {
-        var host = cfg["Smtp:Host"];
-        if (string.IsNullOrEmpty(host))
-        {
-            Console.WriteLine($"[EMAIL] To: {to}\nSubject: {subject}\n{body}");
-            return;
-        }
-
-        using var client = new SmtpClient(host, cfg.GetValue("Smtp:Port", 587))
-        {
-            EnableSsl = cfg.GetValue("Smtp:EnableSsl", true)
-        };
-
-        var user = cfg["Smtp:User"];
-        if (!string.IsNullOrEmpty(user))
-        {
-            client.Credentials = new NetworkCredential(user, cfg["Smtp:Password"]);
-        }
-
-        var from = cfg["Smtp:From"] ?? "no-reply@pawcare.example";
-        client.Send(new MailMessage(from, to, subject, body));
     }
 
     // ------------------------------------------------------------------------
